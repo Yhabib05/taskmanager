@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,13 +28,16 @@ public class TaskList {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "taskList", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<Task> tasks;
-
     @Column(name ="creation_date", nullable = false)
-    private LocalDate creationDate;
+    private LocalDateTime creationDate;
 
     @Column(name ="update_date", nullable = false)
-    private LocalDate updateDate;
+    private LocalDateTime updateDate;
+
+    /*
+    *mapped by says look for the column tasklist on Task to find the tasklist
+     */
+    @OneToMany(mappedBy = "taskList", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private List<Task> tasks;
 
 }

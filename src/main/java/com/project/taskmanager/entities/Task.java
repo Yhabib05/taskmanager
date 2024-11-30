@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -29,9 +30,8 @@ public class Task {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "data_limite")
-    private int dateLimite;
-
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
 
     @Column(name = "status", nullable = false)
     private Status status;
@@ -39,29 +39,29 @@ public class Task {
     @Column(name = "priority", nullable = false)
     private TaskPriority priority;
 
+    @Column(name ="creation_date", nullable = false)
+    private LocalDateTime creationDate;
+
+    @Column(name ="update_date", nullable = false)
+    private LocalDateTime updateDate;
+
     //the tasklist won't be loaded from the database until it is actually needed
     // Opposite to FetchType.EAGER
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_list_id")
+    @JoinColumn(name = "task_list_id") //column containing the id of the tasklist
     //WE ONLY NEED A FOREIGN KEY ON THE MANY SIDE BCS THE FOREIGN KEY TO TASKLIST IS STORED IN THE TASK TABLE
     //THE TASKLIST TABLE DOESNT need to store a foreign key.
     private TaskList taskList;
 
-    @Column(name ="creation_date", nullable = false)
-    private LocalDate creationDate;
 
-    @Column(name ="update_date", nullable = false)
-    private LocalDate updateDate;
-
-
-    public Task(String title, String description, LocalDate updateDate, LocalDate creationDate, TaskPriority priority, Status status, int dateLimite, TaskList taskList) {
+    public Task(String title, String description, LocalDateTime updateDate, LocalDateTime creationDate, TaskPriority priority, Status status, LocalDateTime dueDate, TaskList taskList) {
         this.title = title;
         this.description = description;
         this.updateDate = updateDate;
         this.creationDate = creationDate;
         this.priority = priority;
         this.status = status;
-        this.dateLimite = dateLimite;
+        this.dueDate = dueDate;
         this.taskList = taskList;
     }
     //Equals
