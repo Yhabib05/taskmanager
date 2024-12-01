@@ -1,4 +1,4 @@
-package com.project.taskmanager.dto;
+package com.project.taskmanager.domain.dto;
 
 import java.util.List;
 import java.util.UUID;

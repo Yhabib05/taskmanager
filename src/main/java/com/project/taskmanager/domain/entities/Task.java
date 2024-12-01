@@ -1,10 +1,9 @@
-package com.project.taskmanager.entities;
+package com.project.taskmanager.domain.entities;
 
 
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -33,9 +32,11 @@ public class Task {
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false)
     private TaskPriority priority;
 

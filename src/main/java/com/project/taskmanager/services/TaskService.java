@@ -1,56 +1,16 @@
 package com.project.taskmanager.services;
 
-import com.project.taskmanager.entities.Status;
-import com.project.taskmanager.entities.Task;
-import com.project.taskmanager.entities.TaskList;
-import com.project.taskmanager.entities.TaskPriority;
-import com.project.taskmanager.repositories.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.project.taskmanager.domain.entities.Task;
 
-import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-@Service
-public class TaskService implements ITaskService {
+public interface TaskService {
+    List<Task> listTasks(UUID taskListId);
+    Task createTask(UUID taskList, Task task);
+    Optional<Task> getTaskById(UUID taskListId, UUID taskId);
+    Task updateTask(UUID taskListId, UUID taskId,Task task);
+    void deleteTask(UUID taskListId, UUID taskId);
 
-    TaskRepository taskRepository;
-
-    @Autowired
-    public TaskService(TaskRepository theTaskRepository) {
-        taskRepository = theTaskRepository;
-    }
-
-    @Override
-    public Task createTask(String title, String description, LocalDate updateDate, LocalDate creationDate, TaskPriority priority, Status status, int dateLimite, TaskList taskList) {
-        Task task = new Task(title,description,updateDate,creationDate,priority,status,dateLimite,taskList);
-
-        taskRepository.save(task);
-
-        return task;
-    }
-
-    @Override
-    public void deleteTask(Task task) {
-
-    }
-
-    @Override
-    public Task updateTitle(Task task, String title) {
-        return null;
-    }
-
-    @Override
-    public Task updateDescription(Task task, String description) {
-        return null;
-    }
-
-    @Override
-    public Task updatePriority(Task task, TaskPriority priority) {
-        return null;
-    }
-
-    @Override
-    public Task updateStatus(Task task, Status status) {
-        return null;
-    }
 }

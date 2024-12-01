@@ -1,9 +1,8 @@
-package com.project.taskmanager.entities;
+package com.project.taskmanager.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

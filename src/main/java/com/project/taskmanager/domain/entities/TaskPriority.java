@@ -1,4 +1,4 @@
-package com.project.taskmanager.entities;
+package com.project.taskmanager.domain.entities;
 
 public enum TaskPriority {
     HIGH, MEDIUM, LOW, NONE

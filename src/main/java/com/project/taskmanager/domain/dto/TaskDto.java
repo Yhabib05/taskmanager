@@ -1,7 +1,7 @@
-package com.project.taskmanager.dto;
+package com.project.taskmanager.domain.dto;
 
-import com.project.taskmanager.entities.Status;
-import com.project.taskmanager.entities.TaskPriority;
+import com.project.taskmanager.domain.entities.Status;
+import com.project.taskmanager.domain.entities.TaskPriority;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
