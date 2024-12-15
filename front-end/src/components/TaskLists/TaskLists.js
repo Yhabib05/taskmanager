@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getTaskLists, createTaskList, deleteTaskList } from '../../api/taskListApi';
 import TaskListForm from "./TaskListForm";
-
+import AppNavBar from "../UI/Navbar"
 
 const TaskLists = () => {
     const [taskLists, setTaskLists] = useState([]);
     //const [taskListTitle, setTaskListTitle] = useState('');
     //const [taskListDescription, setTaskListDescription] = useState('');
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskListForm visibility
+    const navigate =useNavigate();
 
     useEffect(() => {
         fetchTaskLists();
@@ -33,14 +35,28 @@ const TaskLists = () => {
         fetchTaskLists();
     };
 
+    const handleNavigateToTasks = (taskListId) => {
+        navigate(`/task-lists/${taskListId}/tasks`);
+    };
+
     return (
         <div>
+            <AppNavBar/>
             <h1>Task Lists</h1>
             <ul>
                 {taskLists.map((list) => (
-                    <li key={list.id}>
+                    <li key={list.id}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleNavigateToTasks(list.id)}
+                    >
                         <strong>{list.title}</strong>: {list.description}
-                        <button onClick={() => handleDelete(list.id)} style={{marginLeft: '10px'}}>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent the click from triggering navigation here also
+                                handleDelete(list.id);
+                            }}
+                            style={{marginLeft: '10px'}}
+                        >
                             Delete
                         </button>
                     </li>

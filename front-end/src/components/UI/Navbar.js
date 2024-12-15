@@ -1,15 +1,29 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import {Link} from "react-router-dom";
 
-const Navbar = () => (
-    <nav style={{ padding: '10px', backgroundColor: '#282c34', color: 'white' }}>
-        <h1>Task Manager</h1>
-        <div>
-            <Link to="/" style={{ margin: '10px', color: 'white', textDecoration: 'none' }}>
-                Task Lists
-            </Link>
-        </div>
-    </nav>
-);
+const AppNavBar = () => {
+    return (
+        <>
+            <Navbar bg="dark" data-bs-theme="dark" >
+                <Container>
+                    <Navbar.Brand as={Link} to="/">
+                        Task Manager
+                    </Navbar.Brand>
+                    <Nav className="me-auto">
+                        <Nav.Link as={Link} to="/">
+                            Home
+                        </Nav.Link>
+                        <Nav.Link as={Link} to="/task-lists">
+                            Task Lists
+                        </Nav.Link>
+                    </Nav>
+                </Container>
+            </Navbar>
+        </>
+    );
+}
 
-export default Navbar;
+export default AppNavBar;
