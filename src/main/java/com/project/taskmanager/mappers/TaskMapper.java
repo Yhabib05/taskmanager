@@ -9,10 +9,4 @@ public interface TaskMapper {
     Task fromDto(TaskDto taskDto);
 
     TaskDto toDto(Task task);
-
-    interface TaskListMapper {
-        TaskList fromDto(TaskListDto taskListDto);
-
-        TaskListDto toDto(TaskList taskList);
-    }
 }

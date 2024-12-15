@@ -32,7 +32,6 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.findByTaskListId(taskListId);
     }
 
-
     @Transactional
     @Override
     public Task createTask(UUID taskListId, Task task) {
@@ -47,7 +46,7 @@ public class TaskServiceImpl implements TaskService {
 
         Status status = Status.OPEN;
         TaskList taskList = taskListRepository.findById(taskListId)
-                .orElseThrow(() -> new IllegalArgumentException("Task does not exist !"));
+                .orElseThrow(() -> new IllegalArgumentException("Tasklist does not exist !"));
 
         LocalDateTime now = LocalDateTime.now();
         Task newTask = new Task(
@@ -76,9 +75,13 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalArgumentException("Task  must have an id !");
         }
         if (!Objects.equals(task.getId(), taskId)){
-            throw new IllegalArgumentException("Task list id should not change !");
+            throw new IllegalArgumentException("Task id should not change !");
         }
-
+/*
+ *      if (!Objects.equals(task.getTaskList().getId(), taskListId)){
+  *         throw new IllegalArgumentException("TaskList id should not change !");
+   *    }
+*/
         if (null==task.getPriority()){
             throw new IllegalArgumentException("Task priority should not be null !");
         }
