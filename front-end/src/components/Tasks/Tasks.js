@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams} from 'react-router-dom';
-import { getTasks, getTaskById, createTask, deleteTask } from '../../api/taskApi';
+import {getTasks, getTaskById, createTask, deleteTask, updateTask} from '../../api/taskApi';
 import TaskForm from './TaskForm';
 import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
@@ -16,6 +16,7 @@ const Tasks = () => {
     const [tasks, setTasks] = useState([]);
     const [task, setTask] = useState(null);
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskForm visibility
+    const [isUpdating, setIsUpdating] = useState(null);//we store the task id being updated
 
     useEffect(() => {
         fetchTasks();
@@ -38,6 +39,18 @@ const Tasks = () => {
         await fetchTasks(); // Refresh the tasks list
     };
 
+    const handleUpdate = async (newTaskData,id) =>{
+        try {
+            await updateTask(task_list_id, id, newTaskData);
+            console.log(task);
+            setIsUpdating(null);
+            await fetchTasks();
+        }
+        catch (error) {
+            console.error('Error updating task:', error.response?.data || error.message); // Log server response
+        }
+    };
+
     const handleDelete = async (id) => {
         await deleteTask(task_list_id, id);
         if (task && task.id===id){ //if the task we re seeing its details is the one we deleted, we need to remove it
@@ -55,12 +68,33 @@ const Tasks = () => {
                     <li key={task.id}>
                         <strong>{task.title}</strong> (Priority: {task.priority}, Due: {task.dueDate || 'N/A'})
                         <p>{task.description}</p>
-                        <button onClick={() => handleDelete(task.id)} style={{ marginLeft: '10px' }}>
+                        <button onClick={() => handleDelete(task.id)} style={{marginLeft: '10px'}}>
                             Delete
                         </button>
-                        <button onClick={()=>handleGetById(task.id)} style={{ marginLeft: '10px' }}>
+                        <button onClick={() => handleGetById(task.id)} style={{marginLeft: '10px'}}>
                             Details
                         </button>
+                            {isUpdating === task.id ? (
+                                <div style={{marginTop: '20px'}}>
+                                <TaskForm
+                                    onSubmit={(newTaskData)=>handleUpdate(newTaskData, task.id)}
+                                    onCancel={() => setIsUpdating(null)}
+                                    initialData={{
+                                        id: task.id,
+                                        title: task.title,
+                                        description: task.description,
+                                        priority: task.priority,
+                                        dueDate: task.dueDate,
+                                        status: task.status,
+                                    }}
+                                />
+                                </div>
+                            ) : (
+                                <button onClick={() => setIsUpdating(task.id)}>Update Task</button>
+
+                            )}
+
+
                     </li>
                 ))}
             </ul>
