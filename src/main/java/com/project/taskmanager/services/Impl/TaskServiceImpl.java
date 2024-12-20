@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class TaskServiceImpl implements TaskService {
         TaskList taskList = taskListRepository.findById(taskListId)
                 .orElseThrow(() -> new IllegalArgumentException("Tasklist does not exist !"));
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
         Task newTask = new Task(
                 null,
                 task.getTitle(),
@@ -97,7 +97,7 @@ public class TaskServiceImpl implements TaskService {
         existingTask.setStatus(task.getStatus());
         existingTask.setPriority(task.getPriority());
 
-        existingTask.setUpdateDate(LocalDateTime.now());
+        existingTask.setUpdateDate(LocalDate.now());
 
         return taskRepository.save(existingTask);
     }

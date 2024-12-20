@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +37,7 @@ public class TaskListServiceImpl implements TaskListService {
             throw new IllegalArgumentException("Task list title should not be null !");
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
         return taskListRepository.save(new TaskList(
                 null,
                 taskList.getTitle(),
@@ -64,7 +65,7 @@ public class TaskListServiceImpl implements TaskListService {
         TaskList oldTaskList = taskListRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Task list not found !"));
         oldTaskList.setTitle(taskList.getTitle());
         oldTaskList.setDescription(taskList.getDescription());
-        oldTaskList.setUpdateDate(LocalDateTime.now());
+        oldTaskList.setUpdateDate(LocalDate.now());
 
         return taskListRepository.save(oldTaskList);
 

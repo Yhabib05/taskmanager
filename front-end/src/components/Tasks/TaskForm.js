@@ -42,6 +42,7 @@ const TaskForm = ({ onSubmit, initialData = {}, onCancel }) => {
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
+                    <option value="NONE">None</option>
                 </select>
             </div>
             <div>

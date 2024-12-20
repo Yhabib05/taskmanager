@@ -3,6 +3,7 @@ package com.project.taskmanager.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -28,10 +29,10 @@ public class TaskList {
     private String description;
 
     @Column(name ="creation_date", nullable = false)
-    private LocalDateTime creationDate;
+    private LocalDate creationDate;
 
     @Column(name ="update_date", nullable = false)
-    private LocalDateTime updateDate;
+    private LocalDate updateDate;
 
     /*
     *mapped by says look for the column tasklist on Task to find the tasklist

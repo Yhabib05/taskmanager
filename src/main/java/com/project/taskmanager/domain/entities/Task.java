@@ -4,6 +4,7 @@ package com.project.taskmanager.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class Task {
     private String description;
 
     @Column(name = "due_date")
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -41,10 +42,10 @@ public class Task {
     private TaskPriority priority;
 
     @Column(name ="creation_date", nullable = false)
-    private LocalDateTime creationDate;
+    private LocalDate creationDate;
 
     @Column(name ="update_date", nullable = false)
-    private LocalDateTime updateDate;
+    private LocalDate updateDate;
 
     //the tasklist won't be loaded from the database until it is actually needed
     // Opposite to FetchType.EAGER
@@ -55,7 +56,7 @@ public class Task {
     private TaskList taskList;
 
 
-    public Task(String title, String description, LocalDateTime updateDate, LocalDateTime creationDate, TaskPriority priority, Status status, LocalDateTime dueDate, TaskList taskList) {
+    public Task(String title, String description, LocalDate updateDate, LocalDate creationDate, TaskPriority priority, Status status, LocalDate dueDate, TaskList taskList) {
         this.title = title;
         this.description = description;
         this.updateDate = updateDate;

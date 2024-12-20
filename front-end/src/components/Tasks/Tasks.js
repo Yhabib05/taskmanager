@@ -4,6 +4,12 @@ import { getTasks, getTaskById, createTask, deleteTask } from '../../api/taskApi
 import TaskForm from './TaskForm';
 import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
+import CloseButton from 'react-bootstrap/CloseButton';
+
+
+
+
+
 const Tasks = () => {
     // the useParams extract "task_list_id" from the route :<Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
     const { task_list_id } = useParams(); // Extract the task_list_id from the URL
@@ -29,12 +35,15 @@ const Tasks = () => {
         // Use the TaskForm's onSubmit to create a task
         await createTask(task_list_id, taskData);
         setIsAdding(false); // Close the form after submission
-        fetchTasks(); // Refresh the tasks list
+        await fetchTasks(); // Refresh the tasks list
     };
 
     const handleDelete = async (id) => {
         await deleteTask(task_list_id, id);
-        fetchTasks(); // Refresh the tasks list
+        if (task && task.id===id){ //if the task we re seeing its details is the one we deleted, we need to remove it
+            setTask(null);
+        }
+        await fetchTasks(); // Refresh the tasks list
     };
 
     return (
@@ -56,12 +65,27 @@ const Tasks = () => {
                 ))}
             </ul>
             {task && (
-                <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #ccc' }}>
+                <div style={{
+                    position: 'relative', //make this container the reference for absolute positioning
+                    marginTop: '20px',
+                    padding: '10px',
+                    border: '1px solid #ccc'
+                }}
+                >
+                    <CloseButton
+                        onClick={()=>setTask(null)}
+                        style={{
+                            position: 'absolute',//now we can use absolute
+                            marginTop: '2px',
+                            right: '5px',
+                        }}
+                    />
                     <h2>Task Details</h2>
                     <p><strong>Title:</strong> {task.title}</p>
                     <p><strong>Description:</strong> {task.description}</p>
                     <p><strong>Priority:</strong> {task.priority}</p>
                     <p><strong>Due Date:</strong> {task.dueDate || 'N/A'}</p>
+
                 </div>
             )}
             <div style={{ marginTop: '20px' }}>
