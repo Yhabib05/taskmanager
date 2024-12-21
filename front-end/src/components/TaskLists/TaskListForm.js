@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 
 const TaskListForm = ({ onSubmit, initialData = {}, onCancel }) => {
+    const [id] = useState(initialData.id || null); // Preserve the ID if provided
     const [title, setTitle] = useState(initialData.title || '');
     const [description, setDescription] = useState(initialData.description || '');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit({ title, description });
-        setTitle('');
-        setDescription('');
+        onSubmit({ id, title, description });
+        if (!id) {
+            setTitle('');
+            setDescription('');
+        }
     };
+
+
 
     return (
         <form onSubmit={handleSubmit}>

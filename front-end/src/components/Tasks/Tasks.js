@@ -107,7 +107,7 @@ const Tasks = () => {
                 }}
                 >
                     <CloseButton
-                        onClick={()=>setTask(null)}
+                        onClick={() => setTask(null)}
                         style={{
                             position: 'absolute',//now we can use absolute
                             marginTop: '2px',
@@ -118,11 +118,12 @@ const Tasks = () => {
                     <p><strong>Title:</strong> {task.title}</p>
                     <p><strong>Description:</strong> {task.description}</p>
                     <p><strong>Priority:</strong> {task.priority}</p>
+                    <p><strong>Status:</strong> {task.status}</p>
                     <p><strong>Due Date:</strong> {task.dueDate || 'N/A'}</p>
 
                 </div>
             )}
-            <div style={{ marginTop: '20px' }}>
+            <div style={{marginTop: '20px' }}>
                 {isAdding ? (
                     <TaskForm
                         onSubmit={handleCreate}
