@@ -5,6 +5,8 @@ import TaskForm from './TaskForm';
 import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
 import CloseButton from 'react-bootstrap/CloseButton';
+import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
+
 
 
 
@@ -17,37 +19,59 @@ const Tasks = () => {
     const [task, setTask] = useState(null);
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskForm visibility
     const [isUpdating, setIsUpdating] = useState(null);//we store the task id being updated
+    const [isLoading,setIsLoading] = useState(false);
 
     useEffect(() => {
         fetchTasks();
     }, [task_list_id]);
 
     const fetchTasks = async () => {
-        const { data } = await getTasks(task_list_id);
-        setTasks(data);
+        setIsLoading(true);
+        try{
+            const { data } = await getTasks(task_list_id);
+            setTasks(data);
+        } catch(error){
+            console.error("Error while fetching task data",error);
+        } finally {
+            setIsLoading(false);
+        }
+
+
     };
 
     const handleGetById =async (task_id) => {
-        const {data} = await getTaskById(task_list_id, task_id);
-        setTask(data);
+        setIsLoading(true);
+        try{
+            const {data} = await getTaskById(task_list_id, task_id);
+            setTask(data);
+        } catch(error) {
+            console.error("Error while fetching the task",error);
+        } finally {
+            setIsLoading(false);
+        }
+
     }
 
     const handleCreate = async (taskData) => {
         // Use the TaskForm's onSubmit to create a task
-        await createTask(task_list_id, taskData);
-        setIsAdding(false); // Close the form after submission
-        await fetchTasks(); // Refresh the tasks list
+        try {
+            await createTask(task_list_id, taskData);
+            setIsAdding(false); // Close the form after submission
+            await fetchTasks(); // Refresh the tasks list
+        } catch(error){
+            console.error("error while creating the task",error);
+        }
     };
 
     const handleUpdate = async (newTaskData,id) =>{
         try {
             await updateTask(task_list_id, id, newTaskData);
-            console.log(task);
+            //console.log(task);
             setIsUpdating(null);
             await fetchTasks();
         }
         catch (error) {
-            console.error('Error updating task:', error.response?.data || error.message); // Log server response
+            console.error('Error updating task:', error); // Log server response
         }
     };
 
@@ -61,78 +85,116 @@ const Tasks = () => {
 
     return (
         <div>
-            <AppNavBar/>
-            <h1>Tasks</h1>
-            <ul>
-                {tasks.map((task) => (
-                    <li key={task.id}>
-                        <strong>{task.title}</strong> (Priority: {task.priority}, Due: {task.dueDate || 'N/A'})
-                        <p>{task.description}</p>
-                        <button onClick={() => handleDelete(task.id)} style={{marginLeft: '10px'}}>
-                            Delete
-                        </button>
-                        <button onClick={() => handleGetById(task.id)} style={{marginLeft: '10px'}}>
-                            Details
-                        </button>
-                            {isUpdating === task.id ? (
-                                <div style={{marginTop: '20px'}}>
-                                <TaskForm
-                                    onSubmit={(newTaskData)=>handleUpdate(newTaskData, task.id)}
-                                    onCancel={() => setIsUpdating(null)}
-                                    initialData={{
-                                        id: task.id,
-                                        title: task.title,
-                                        description: task.description,
-                                        priority: task.priority,
-                                        dueDate: task.dueDate,
-                                        status: task.status,
-                                    }}
-                                />
-                                </div>
-                            ) : (
-                                <button onClick={() => setIsUpdating(task.id)}>Update Task</button>
-
-                            )}
-
-
-                    </li>
-                ))}
-            </ul>
-            {task && (
-                <div style={{
-                    position: 'relative', //make this container the reference for absolute positioning
-                    marginTop: '20px',
-                    padding: '10px',
-                    border: '1px solid #ccc'
-                }}
-                >
-                    <CloseButton
-                        onClick={() => setTask(null)}
+            <AppNavBar />
+            <Container>
+                <h1 className="text-center mt-4">Tasks</h1>
+                {isLoading ? (
+                    <div
                         style={{
-                            position: 'absolute',//now we can use absolute
-                            marginTop: '2px',
-                            right: '5px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100vh', // Full height of the viewport
                         }}
-                    />
-                    <h2>Task Details</h2>
-                    <p><strong>Title:</strong> {task.title}</p>
-                    <p><strong>Description:</strong> {task.description}</p>
-                    <p><strong>Priority:</strong> {task.priority}</p>
-                    <p><strong>Status:</strong> {task.status}</p>
-                    <p><strong>Due Date:</strong> {task.dueDate || 'N/A'}</p>
-
-                </div>
-            )}
-            <div style={{marginTop: '20px' }}>
-                {isAdding ? (
-                    <TaskForm
-                        onSubmit={handleCreate}
-                        onCancel={() => setIsAdding(false)} // Close form on cancel
-                    />
+                    >
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
+                    </div>
                 ) : (
-                    <button onClick={() => setIsAdding(true)}>Add Task</button>
+                    <Row className="mt-4">
+                        {tasks.map((task) => (
+                            <Col key={task.id} md={4} className="mb-4">
+                                <Card>
+                                    <Card.Body>
+                                        <Card.Title>{task.title}</Card.Title>
+                                        <Card.Text>
+                                            {task.description || 'No description available.'}
+                                        </Card.Text>
+                                        <p>
+                                            <strong>Priority:</strong> {task.priority} <br />
+                                            <strong>Due Date:</strong> {task.dueDate || 'N/A'}
+                                        </p>
+                                        <div className="d-flex justify-content-between">
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => setIsUpdating(task.id)}
+                                            >
+                                                Update
+                                            </Button>
+                                            <Button
+                                                variant="warning"
+                                                onClick={() => handleGetById(task.id)}
+                                            >
+                                                Details
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => handleDelete(task.id)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
+                                        {isUpdating === task.id && (
+                                            <div style={{ marginTop: '20px' }}>
+                                                <TaskForm
+                                                    onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
+                                                    onCancel={() => setIsUpdating(null)}
+                                                    initialData={{
+                                                        id: task.id,
+                                                        title: task.title,
+                                                        description: task.description,
+                                                        priority: task.priority,
+                                                        dueDate: task.dueDate,
+                                                        status: task.status,
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
                 )}
-            </div>
+                {task && (
+                    <div
+                        style={{
+                            position: 'relative',
+                            marginTop: '20px',
+                            padding: '10px',
+                            border: '1px solid #ccc',
+                        }}
+                    >
+                        <CloseButton
+                            onClick={() => setTask(null)}
+                            style={{
+                                position: 'absolute',
+                                top: '10px',
+                                right: '10px',
+                            }}
+                        />
+                        <h2>Task Details</h2>
+                        <p><strong>Title:</strong> {task.title}</p>
+                        <p><strong>Description:</strong> {task.description}</p>
+                        <p><strong>Priority:</strong> {task.priority}</p>
+                        <p><strong>Status:</strong> {task.status}</p>
+                        <p><strong>Due Date:</strong> {task.dueDate || 'N/A'}</p>
+                    </div>
+                )}
+                <div style={{ marginTop: '20px' }}>
+                    {isAdding ? (
+                        <TaskForm
+                            onSubmit={handleCreate}
+                            onCancel={() => setIsAdding(false)} // Close form on cancel
+                        />
+                    ) : (
+                        <Button variant="success" onClick={() => setIsAdding(true)}>
+                            Add Task
+                        </Button>
+                    )}
+                </div>
+            </Container>
         </div>
     );
 };

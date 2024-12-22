@@ -4,14 +4,15 @@ import { getTaskLists, getTaskListById ,createTaskList, updateTaskList , deleteT
 import TaskListForm from "./TaskListForm";
 import AppNavBar from "../UI/Navbar"
 import CloseButton from "react-bootstrap/CloseButton";
+import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
 
 const TaskLists = () => {
     const [taskLists, setTaskLists] = useState([]);
     const [taskList, setTaskList] = useState(null);
-    //const [taskListTitle, setTaskListTitle] = useState('');
-    //const [taskListDescription, setTaskListDescription] = useState('');
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskListForm visibility
     const [isUpdating , setIsUpdating] = useState(null);
+    const [isLoading,setIsLoading] = useState(false);
+
     const navigate =useNavigate();
 
     useEffect(() => {
@@ -19,17 +20,23 @@ const TaskLists = () => {
     }, []);
 
     const fetchTaskLists = async () => {
-        const { data } = await getTaskLists();
-        setTaskLists(data);
+        setIsLoading(true);
+        try{
+            const { data } = await getTaskLists();
+            setTaskLists(data);
+        } catch (e){
+            console.error("Error while fetching tasklists ",e);
+        } finally {
+            setIsLoading(false);
+        }
+
+
     };
 
     const handleCreate = async (taskList) => {
-        //if (!taskListTitle.trim()) return;
         await createTaskList(taskList);
         setIsAdding(false);
-        /*await createTaskList({ title: taskListTitle, description: taskListDescription });
-        setTaskListTitle('');
-        setTaskListDescription('');*/
+
         fetchTaskLists();
     };
 
@@ -39,10 +46,19 @@ const TaskLists = () => {
     };
 
     const handleGetById = async (id) => {
-        const {data} = await getTaskListById(id);
-        setTaskList(data);
-        console.log("returning the task list details :", data);
-        fetchTaskLists();
+        setIsLoading(true);
+        try{
+            const {data} = await getTaskListById(id);
+            setTaskList(data);
+            //console.log("returning the task list details :", data);
+            fetchTaskLists();
+        } catch(e){
+            console.error("Error while fetching the taskList",e);
+
+        } finally {
+            setIsLoading(false);
+        }
+
     }
 
     const handleNavigateToTasks = (taskListId) => {
@@ -63,111 +79,109 @@ const TaskLists = () => {
 
     return (
         <div>
-            <AppNavBar/>
-            <h1>Task Lists</h1>
-            <ul>
-                {taskLists.map((list) => (
-                    <li
-                        key={list.id}
-                        style={{cursor: 'pointer'}}
-                        onClick={(e) => {
-                            if (e.target.tagName !== 'LI') return; // Only navigate if the <li> itself is clicked
-                            handleNavigateToTasks(list.id);
+            <AppNavBar />
+            <Container>
+                <h1 className="text-center mt-4">Task Lists</h1>
+                {isLoading ? (
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: '100vh',
                         }}
                     >
-                        <strong>{list.title}</strong>: {list.description}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation(); // Prevent the click from triggering navigation here also
-                                handleDelete(list.id);
-                            }}
-                            style={{marginLeft: '10px'}}
-                        >
-                            Delete
-                        </button>
-                        <button onClick={(e) => {
-                            e.stopPropagation();
-                            handleGetById(list.id);
-                        }} style={{marginLeft: '10px'}}
-                        >
-                            Details
-                        </button>
-                        {isUpdating === list.id ? (
-                            <div style={{marginTop: '20px'}}>
-                                <TaskListForm
-                                    onSubmit={(data)=>handleUpdate(list.id,data )}
-                                    onCancel={() => setIsUpdating(null)}
-                                    initialData={{
-                                        id: list.id,
-                                        title: list.title,
-                                        description: list.description,
-                                        //count: list.count,
-                                        //progress: list.progress,
-                                    }}
-                                />
-                            </div>
-                        ) : (
-                            <button onClick={(e) => {
-                                e.stopPropagation();
-                                setIsUpdating(list.id);
-                            }} style={{marginLeft: '10px'}}
-                            >Update TaskList</button>
-
-                        )}
-                    </li>
-                ))}
-            </ul>
-            {taskList && (
-                <div style={{
-                    position: 'relative', //make this container the reference for absolute positioning
-                    marginTop: '20px',
-                    padding: '10px',
-                    border: '1px solid #ccc'
-                }}
-                >
-                    <CloseButton
-                        onClick={() => setTaskList(null)}
-                        style={{
-                            position: 'absolute',//now we can use absolute
-                            marginTop: '2px',
-                            right: '5px',
-                        }}
-                    />
-                    <h2>TaskList Details</h2>
-                    <p><strong>Title:</strong> {taskList.title}</p>
-
-                    <p><strong>Description:</strong> {taskList.description}</p>
-                    <p><strong>Count:</strong> {taskList.count}</p>
-                    <p><strong>Progress:</strong> {taskList.progress}</p>
-                    <div>
-                        <strong>Tasks:</strong>
-                        {taskList.tasks && taskList.tasks.length >0 ? (
-                            <ul>
-                                {taskList.tasks.map((task) => (
-                                    <li key={task.id}>
-                                        <strong>Title:</strong> {task.title} <br/>
-                                        <strong>Description</strong> {task.description} <br/>
-                                        <strong>Priority</strong> {task.priority} <br/>
-                                        <strong>Status</strong> {task.status} <br/>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                                <p>No tasks available</p>
-                        )}
+                        <Spinner animation="border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </Spinner>
                     </div>
-                </div>
-                )}
-            <div style={{marginTop: '20px'}}>
-                {isAdding ? (
-                    <TaskListForm
-                        onSubmit={handleCreate}
-                        onCancel={() => setIsAdding(false)}
-                    />
                 ) : (
-                    <button onClick={() => setIsAdding(true)}>Add Task List</button>
+                    <Row className="mt-4">
+                        {taskLists.map((list) => (
+                            <Col key={list.id} md={4} className="mb-4">
+                                <Card>
+                                    <Card.Body>
+                                        <Card.Title>{list.title}</Card.Title>
+                                        <Card.Text>
+                                            {list.description || 'No description available.'}
+                                        </Card.Text>
+                                        <div className="d-flex justify-content-between">
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => handleNavigateToTasks(list.id)}
+                                            >
+                                                View Tasks
+                                            </Button>
+                                            <Button
+                                                variant="warning"
+                                                onClick={() => setIsUpdating(list.id)}
+                                            >
+                                                Update
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => handleDelete(list.id)}
+                                            >
+                                                Delete
+                                            </Button>
+                                            <Button
+                                                onClick={() => handleGetById(list.id)}
+                                            >
+                                                Details
+                                            </Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                                {isUpdating === list.id && (
+                                    <TaskListForm
+                                        onSubmit={(data) => handleUpdate(list.id, data)}
+                                        onCancel={() => setIsUpdating(null)}
+                                        initialData={{
+                                            id: list.id,
+                                            title: list.title,
+                                            description: list.description,
+                                        }}
+                                    />
+                                )}
+                            </Col>
+                        ))}
+                    </Row>
                 )}
-            </div>
+
+                {taskList && (
+                    <div style={{
+                        position: 'relative',
+                        marginTop: '20px',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                    }}>
+                        <CloseButton
+                            onClick={() => setTaskList(null)}
+                            style={{
+                                position: 'absolute',
+                                marginTop: '2px',
+                                right: '5px',
+                            }}
+                        />
+                        <h2>Task List Details</h2>
+                        <p><strong>Title:</strong> {taskList.title}</p>
+                        <p><strong>Description:</strong> {taskList.description}</p>
+                        <p><strong>Count:</strong> {taskList.count}</p>
+                        <p><strong>Progress:</strong> {taskList.progress}</p>
+                    </div>
+                )}
+
+                <div className="mt-4">
+                    {isAdding ? (
+                        <TaskListForm
+                            onSubmit={handleCreate}
+                            onCancel={() => setIsAdding(false)}
+                        />
+                    ) : (
+                        <Button onClick={() => setIsAdding(true)}>Add Task List</Button>
+                    )}
+                </div>
+            </Container>
         </div>
     );
 };
