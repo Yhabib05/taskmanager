@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Form, Button, Container } from 'react-bootstrap';
 
 const TaskListForm = ({ onSubmit, initialData = {}, onCancel }) => {
     const [id] = useState(initialData.id || null); // Preserve the ID if provided
@@ -17,26 +18,43 @@ const TaskListForm = ({ onSubmit, initialData = {}, onCancel }) => {
 
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label>Title</label>
-                <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                />
-            </div>
-            <div>
-                <label>Description</label>
-                <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-            </div>
-            <button type="submit">Save</button>
-            {onCancel && <button type="button" onClick={onCancel}>Cancel</button>}
-        </form>
+        <Container>
+            <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="taskListTitle" className="mb-3">
+                    <Form.Label>Title</Form.Label>
+                    <Form.Control
+                        type="text"
+                        placeholder="Enter task list title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group controlId="taskListDescription" className="mb-3">
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        rows={3}
+                        placeholder="Enter tasklist description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                </Form.Group>
+                <div className="d-flex justify-content-between">
+                    <Button
+                        variant= "primary"
+                        type="submit">
+                        Save
+                    </Button>
+                    {onCancel && <Button
+                        variant="secondary"
+                        type="button" onClick={onCancel}>
+                        Cancel
+                    </Button>
+                    }
+                </div>
+            </Form>
+        </Container>
     );
 };
 
