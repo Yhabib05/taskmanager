@@ -6,6 +6,7 @@ import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
 import CloseButton from 'react-bootstrap/CloseButton';
 import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
+import {getTaskListById} from "../../api/taskListApi";
 
 
 
@@ -15,6 +16,8 @@ import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
 const Tasks = () => {
     // the useParams extract "task_list_id" from the route :<Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
     const { task_list_id } = useParams(); // Extract the task_list_id from the URL
+    const [taskListTitle, setTaskListTitle] = useState('');
+
     const [tasks, setTasks] = useState([]);
     const [task, setTask] = useState(null);
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskForm visibility
@@ -23,6 +26,7 @@ const Tasks = () => {
 
     useEffect(() => {
         fetchTasks();
+        fetchTaskListTitle();
     }, [task_list_id]);
 
     const fetchTasks = async () => {
@@ -35,9 +39,15 @@ const Tasks = () => {
         } finally {
             setIsLoading(false);
         }
-
-
     };
+    const fetchTaskListTitle = async () =>{
+        try{
+            const {data} = await getTaskListById(task_list_id);
+            setTaskListTitle(data.title);
+        } catch {
+            console.error("tasklist title can't be fetched");
+        }
+    }
 
     const handleGetById =async (task_id) => {
         setIsLoading(true);
@@ -103,58 +113,75 @@ const Tasks = () => {
                     </div>
                 ) : (
                     <Row className="mt-4">
-                        {tasks.map((task) => (
-                            <Col key={task.id} md={4} className="mb-4">
-                                <Card>
-                                    <Card.Body>
-                                        <Card.Title>{task.title}</Card.Title>
-                                        <Card.Text>
-                                            {task.description || 'No description available.'}
-                                        </Card.Text>
-                                        <p>
-                                            <strong>Priority:</strong> {task.priority} <br />
-                                            <strong>Due Date:</strong> {task.dueDate || 'N/A'}
-                                        </p>
-                                        <div className="d-flex justify-content-between">
-                                            <Button
-                                                variant="primary"
-                                                onClick={() => setIsUpdating(task.id)}
-                                            >
-                                                Update
-                                            </Button>
-                                            <Button
-                                                variant="warning"
-                                                onClick={() => handleGetById(task.id)}
-                                            >
-                                                Details
-                                            </Button>
-                                            <Button
-                                                variant="danger"
-                                                onClick={() => handleDelete(task.id)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                        {isUpdating === task.id && (
-                                            <div style={{ marginTop: '20px' }}>
-                                                <TaskForm
-                                                    onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
-                                                    onCancel={() => setIsUpdating(null)}
-                                                    initialData={{
-                                                        id: task.id,
-                                                        title: task.title,
-                                                        description: task.description,
-                                                        priority: task.priority,
-                                                        dueDate: task.dueDate,
-                                                        status: task.status,
-                                                    }}
-                                                />
+                        {tasks.map((task) => {
+                            let cardBorderColor;
+                            switch (task.priority) {
+                                case 'LOW':
+                                    cardBorderColor = 'success';
+                                    break;
+                                case 'MEDIUM':
+                                    cardBorderColor = 'warning'; //yellow
+                                    break;
+                                case 'HIGH':
+                                    cardBorderColor = 'danger'; //red
+                                    break;
+                                default :
+                                    cardBorderColor = 'secondary'; //grey
+                            }
+                            return (
+                                <Col key={task.id} md={4} className="mb-4">
+                                    <Card border={cardBorderColor}>
+                                        <Card.Header>{taskListTitle}</Card.Header>
+                                        <Card.Body>
+                                            <Card.Title>{task.title}</Card.Title>
+                                            <Card.Text>
+                                                {task.description || 'No description available.'}
+                                            </Card.Text>
+                                            <p>
+                                                <strong>Priority:</strong> {task.priority} <br/>
+                                                <strong>Due Date:</strong> {task.dueDate || 'N/A'}
+                                            </p>
+                                            <div className="d-flex justify-content-between">
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={() => setIsUpdating(task.id)}
+                                                >
+                                                    Update
+                                                </Button>
+                                                <Button
+                                                    variant="warning"
+                                                    onClick={() => handleGetById(task.id)}
+                                                >
+                                                    Details
+                                                </Button>
+                                                <Button
+                                                    variant="danger"
+                                                    onClick={() => handleDelete(task.id)}
+                                                >
+                                                    Delete
+                                                </Button>
                                             </div>
-                                        )}
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
+                                            {isUpdating === task.id && (
+                                                <div style={{marginTop: '20px'}}>
+                                                    <TaskForm
+                                                        onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
+                                                        onCancel={() => setIsUpdating(null)}
+                                                        initialData={{
+                                                            id: task.id,
+                                                            title: task.title,
+                                                            description: task.description,
+                                                            priority: task.priority,
+                                                            dueDate: task.dueDate,
+                                                            status: task.status,
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            );
+                        })}
                     </Row>
                 )}
                 {task && (

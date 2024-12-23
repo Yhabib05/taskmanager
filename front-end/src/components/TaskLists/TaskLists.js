@@ -4,6 +4,8 @@ import { getTaskLists, getTaskListById ,createTaskList, updateTaskList , deleteT
 import TaskListForm from "./TaskListForm";
 import AppNavBar from "../UI/Navbar"
 import CloseButton from "react-bootstrap/CloseButton";
+import ProgressBar from "react-bootstrap/ProgressBar"
+
 import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
 
 const TaskLists = () => {
@@ -99,7 +101,7 @@ const TaskLists = () => {
                     <Row className="mt-4">
                         {taskLists.map((list) => (
                             <Col key={list.id} md={4} className="mb-4">
-                                <Card>
+                                <Card border="primary">
                                     <Card.Body>
                                         <Card.Title>{list.title}</Card.Title>
                                         <Card.Text>
@@ -129,6 +131,9 @@ const TaskLists = () => {
                                             >
                                                 Details
                                             </Button>
+                                        </div>
+                                        <div className="mt-3" >
+                                            <ProgressBar now={list.progress*100} label={`${list.progress*100}%`} />
                                         </div>
                                     </Card.Body>
                                 </Card>
