@@ -68,7 +68,7 @@ public class TaskListController {
     }
 
     /*New Method*/
-    @GetMapping(path="user/{user_id}/task-lists")
+    @GetMapping(path="/utilisateurs/{user_id}/task-lists")
     public List<TaskListDto> getTaskListByAuthor(@PathVariable("user_id") UUID authorId){
         return taskListService.getTaskListByAuthor(authorId)
                 .stream()
@@ -77,7 +77,7 @@ public class TaskListController {
     }
 
     /*New Method*/
-    @PostMapping(path="task-lists/{task_list_id}/members")
+    @PostMapping(path="/task-lists/{task_list_id}/members")
     public void addUserToTaskList(@PathVariable("task_list_id") UUID taskListId, @RequestBody Utilisateur utilisateur ){
         TaskList taskList = taskListService.getTaskListById(taskListId)
                 .orElseThrow(()->new IllegalArgumentException("tasklist not found with Id"+ taskListId));
@@ -85,7 +85,7 @@ public class TaskListController {
 
     }
     /*New Method*/
-    @DeleteMapping(path="task-lists/{task_list_id}/members/{member_id}")
+    @DeleteMapping(path="/task-lists/{task_list_id}/members/{member_id}")
     public void DeleteUserFromTaskList(@PathVariable("task_list_id") UUID taskListId,@PathVariable("member_id") UUID utilisateurId ){
         TaskList taskList = taskListService.getTaskListById(taskListId)
                 .orElseThrow(()->new IllegalArgumentException("tasklist not found with Id"+ taskListId));
