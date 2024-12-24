@@ -50,7 +50,7 @@ public class Task {
     //the tasklist won't be loaded from the database until it is actually needed
     // Opposite to FetchType.EAGER
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_list_id") //column containing the id of the tasklist
+    @JoinColumn(name = "task_list_id") //column containing the id of the tasklist(foreign key)
     //WE ONLY NEED A FOREIGN KEY ON THE MANY SIDE BCS THE FOREIGN KEY TO TASKLIST IS STORED IN THE TASK TABLE
     //THE TASKLIST TABLE DOESNT need to store a foreign key.
     private TaskList taskList;

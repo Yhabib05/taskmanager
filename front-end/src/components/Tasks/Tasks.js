@@ -131,7 +131,7 @@ const Tasks = () => {
                             return (
                                 <Col key={task.id} md={4} className="mb-4">
                                     <Card border={cardBorderColor}>
-                                        <Card.Header>{taskListTitle}</Card.Header>
+                                        <Card.Header as="h5">{taskListTitle}</Card.Header>
                                         <Card.Body>
                                             <Card.Title>{task.title}</Card.Title>
                                             <Card.Text>

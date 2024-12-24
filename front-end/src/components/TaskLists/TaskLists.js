@@ -53,6 +53,7 @@ const TaskLists = () => {
             const {data} = await getTaskListById(id);
             setTaskList(data);
             //console.log("returning the task list details :", data);
+            //console.log("list progress",data.progress);
             fetchTaskLists();
         } catch(e){
             console.error("Error while fetching the taskList",e);
@@ -102,8 +103,8 @@ const TaskLists = () => {
                         {taskLists.map((list) => (
                             <Col key={list.id} md={4} className="mb-4">
                                 <Card border="primary">
+                                    <Card.Header as="h5" className="p-3 mb-2 bg-gradient-warning text-dark">{list.title}</Card.Header>
                                     <Card.Body>
-                                        <Card.Title>{list.title}</Card.Title>
                                         <Card.Text>
                                             {list.description || 'No description available.'}
                                         </Card.Text>

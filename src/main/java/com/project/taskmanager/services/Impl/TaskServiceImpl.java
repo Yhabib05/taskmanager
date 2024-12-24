@@ -41,7 +41,9 @@ public class TaskServiceImpl implements TaskService {
         if (null==task.getTitle() || task.getTitle().isBlank()){
             throw new IllegalArgumentException("Task title should not be null !");
         }
-
+        if (task.getDueDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Due date cannot be in the past");
+        }
         TaskPriority taskPriority = Optional.ofNullable(task.getPriority()).orElse(TaskPriority.MEDIUM);
 
         Status status = Status.OPEN;
@@ -77,8 +79,11 @@ public class TaskServiceImpl implements TaskService {
         if (!Objects.equals(task.getId(), taskId)){
             throw new IllegalArgumentException("Task id should not change !");
         }
+        if (task.getDueDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Due date cannot be in the past");
+        }
 /*
- *      if (!Objects.equals(task.getTaskList().getId(), taskListId)){
+ *      if (!Objects.equals(task.getTaskListById().getId(), taskListId)){
   *         throw new IllegalArgumentException("TaskList id should not change !");
    *    }
 */

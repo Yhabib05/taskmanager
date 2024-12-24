@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import {Form, Button, Container, Row, Col, Alert} from 'react-bootstrap';
 
 const TaskForm = ({ onSubmit, initialData = {}, onCancel }) => {
     const [id] = useState(initialData.id || null); // Preserve the ID if provided
@@ -7,12 +7,22 @@ const TaskForm = ({ onSubmit, initialData = {}, onCancel }) => {
     const [description, setDescription] = useState(initialData.description || '');
     const [priority, setPriority] = useState(initialData.priority || 'MEDIUM');
     const [status, setStatus] = useState(initialData.status || 'OPEN'); // Default status
-
+    //const [error,setError]=useState('')
     const [dueDate, setDueDate] = useState(initialData.dueDate || '');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit({ id, title, description, priority, dueDate, status });
+        /*
+        const today = new Date().toISOString().split('T')[0];
+        if (dueDate && dueDate < today) {
+            setError('Due date cannot be in the past.');
+            return; // Prevent submission if the date is invalid
+        }
+
+        setError(''); // Clear any existing errors
+        */
+
         // Reset fields only for new task creation only, not the update
         if (!id) {
             setTitle('');
@@ -68,8 +78,10 @@ const TaskForm = ({ onSubmit, initialData = {}, onCancel }) => {
                                 type="date"
                                 value={dueDate}
                                 onChange={(e) => setDueDate(e.target.value)}
+                                min={new Date().toISOString().split('T')[0]}
                             />
                         </Form.Group>
+
                     </Col>
                 </Row>
                 <Form.Group controlId="taskStatus" className="mb-3">

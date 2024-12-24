@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,15 @@ public class TaskList {
 
     @Column(name = "description")
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "utilisateurs_id", nullable = false)
+    //@Column(name="author")
+    private Utilisateur author;
+
+    @ManyToMany
+    @JoinTable(name = "tasklist_members")
+    private List<Utilisateur> utilisateurs= new ArrayList <>();
 
     @Column(name ="creation_date", nullable = false)
     private LocalDate creationDate;

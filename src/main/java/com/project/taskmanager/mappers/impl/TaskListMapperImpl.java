@@ -26,6 +26,8 @@ public class TaskListMapperImpl implements TaskListMapper {
                 taskListDto.id(),
                 taskListDto.title(),
                 taskListDto.description(),
+                taskListDto.author(),
+                taskListDto.utilisateurs(),
                 null,
                 null,
                 Optional.ofNullable(taskListDto.tasks())
@@ -42,6 +44,8 @@ public class TaskListMapperImpl implements TaskListMapper {
                 taskList.getId(),
                 taskList.getTitle(),
                 taskList.getDescription(),
+                taskList.getAuthor(),
+                taskList.getUtilisateurs(),
                 Optional.ofNullable(taskList.getTasks())
                         .map(List::size)
                         .orElse(0),
@@ -56,8 +60,8 @@ public class TaskListMapperImpl implements TaskListMapper {
     }
 
     public Double calculateTaskListProgress(List<Task> tasks){
-        if (null==tasks){
-            return null;
+        if (null==tasks || tasks.isEmpty()){
+            return 0.0;
         }
         long closedTaskCount = tasks.stream().filter(
                 task -> Status.CLOSED==task.getStatus())
