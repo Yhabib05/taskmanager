@@ -19,12 +19,12 @@ public class UtilisateurController {
     }
 
     @GetMapping
-    public List<Utilisateur> listUtilisateurs(){
+    public List<Utilisateur> getAllUtilisateurs(){
         return utilisateurService.listUtilisateurs();
     }
 
     @PostMapping
-    public Utilisateur addUtilisateur(@RequestBody Utilisateur utilisateur){
+    public Utilisateur createUtilisateur(@RequestBody Utilisateur utilisateur){
         return utilisateurService.createUtilisateur(utilisateur);
     }
 

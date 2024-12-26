@@ -1,5 +1,6 @@
 import api from "./api";
 
+export const login = (data)=>api.post('/login',data)
 
 export const getAllUsers = ()=>api.get(`/utilisateurs`);
 export const getUserById = (id)=>api.get(`/utilisateurs/${id}`)

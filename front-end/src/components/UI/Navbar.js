@@ -9,11 +9,11 @@ const AppNavBar = () => {
         <>
             <Navbar bg="dark" data-bs-theme="dark" >
                 <Container>
-                    <Navbar.Brand as={Link} to="/">
+                    <Navbar.Brand as={Link} to="/Home">
                         Task Manager
                     </Navbar.Brand>
                     <Nav className="me-auto">
-                        <Nav.Link as={Link} to="/">
+                        <Nav.Link as={Link} to="/Home">
                             Home
                         </Nav.Link>
                         <Nav.Link as={Link} to="/task-lists">

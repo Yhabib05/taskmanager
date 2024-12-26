@@ -5,11 +5,15 @@ import Tasks from './components/Tasks/Tasks';
 import Users from './components/Users/Users'
 import NotFound from './components/NotFound/NotFound'
 import Home from './pages/Home'
+import Login from './pages/Login'
+import Landing from './pages/Landing'
 
 const App = () => (
     <Router>
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/Login" element={<Login />} />
+            <Route path="/Home" element={<Home />} />
             <Route path="/task-lists" element={<TaskLists />} />
             <Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
             <Route path="/utilisateurs" element={<Users />} />

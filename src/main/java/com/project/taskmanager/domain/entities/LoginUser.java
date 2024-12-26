@@ -9,14 +9,14 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@ToString
 public class LoginUser {
     @Id
     private String email;
+
+    private String nom;
 
     private String password;
 }
