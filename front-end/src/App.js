@@ -7,6 +7,7 @@ import NotFound from './components/NotFound/NotFound'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
+import TaskListsJoined from "./components/TaskLists/TaskListsJoined";
 
 const App = () => (
     <Router>
@@ -14,6 +15,7 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/Login" element={<Login />} />
             <Route path="/Home" element={<Home />} />
+            <Route path="Joined-Tasklists" element={<TaskListsJoined />} />
             <Route path="/task-lists" element={<TaskLists />} />
             <Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
             <Route path="/utilisateurs" element={<Users />} />

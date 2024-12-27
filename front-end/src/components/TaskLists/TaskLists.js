@@ -7,6 +7,7 @@ import CloseButton from "react-bootstrap/CloseButton";
 import ProgressBar from "react-bootstrap/ProgressBar"
 
 import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
+import {getTaskListsByAuthor} from "../../api/userApi";
 
 const TaskLists = () => {
     const [taskLists, setTaskLists] = useState([]);
@@ -18,9 +19,10 @@ const TaskLists = () => {
     const navigate =useNavigate();
 
     useEffect(() => {
-        fetchTaskLists();
+        fetchTaskListsByAuthor();
     }, []);
 
+    /*
     const fetchTaskLists = async () => {
         setIsLoading(true);
         try{
@@ -31,20 +33,31 @@ const TaskLists = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+*/
 
-
+    const fetchTaskListsByAuthor = async () => {
+        setIsLoading(true);
+        try{
+            const { data } = await getTaskListsByAuthor();
+            setTaskLists(data);
+        } catch (e){
+            console.error("Error while fetching tasklists for user ",e);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleCreate = async (taskList) => {
         await createTaskList(taskList);
         setIsAdding(false);
 
-        fetchTaskLists();
+        fetchTaskListsByAuthor();
     };
 
     const handleDelete = async (id) => {
         await deleteTaskList(id);
-        fetchTaskLists();
+        fetchTaskListsByAuthor();
     };
 
     const handleGetById = async (id) => {
@@ -54,7 +67,7 @@ const TaskLists = () => {
             setTaskList(data);
             //console.log("returning the task list details :", data);
             //console.log("list progress",data.progress);
-            fetchTaskLists();
+            fetchTaskListsByAuthor();
         } catch(e){
             console.error("Error while fetching the taskList",e);
 
@@ -73,7 +86,7 @@ const TaskLists = () => {
             await updateTaskList(id, data);
             console.log(taskList);
             setIsUpdating(null);
-            await fetchTaskLists();
+            await fetchTaskListsByAuthor();
         }
         catch (error) {
             console.error('Error updating taskList:', error.response?.data || error.message); // Log server response

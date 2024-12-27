@@ -20,7 +20,7 @@ const Login = () => {
         event.preventDefault();
         setLoading(true);
 
-        console.log(`Username :${inputUsername}, Password :${inputPassword}`);
+        //console.log(`Username :${inputUsername}, Password :${inputPassword}`);
         try{
             await login({
                 email:inputUsername,
