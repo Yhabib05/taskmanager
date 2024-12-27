@@ -17,5 +17,3 @@ public interface TaskListService {
     List<TaskList> getTaskListByMember(UUID memberId);
     List<TaskList> getTaskListByAuthor(UUID authorId);
 }
-
-

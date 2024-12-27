@@ -9,3 +9,5 @@ export const createTaskList = (data) => api.post('/task-lists', data);
 export const updateTaskList = (id, data) => api.put(`/task-lists/${id}`, data);
 export const deleteTaskList = (id) => api.delete(`/task-lists/${id}`);
 
+/* New */
+export const getTaskListsByAuthor = (userEmail) => api.get(`/task-lists/${userEmail}/`);

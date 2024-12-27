@@ -22,10 +22,12 @@ const Login = () => {
 
         //console.log(`Username :${inputUsername}, Password :${inputPassword}`);
         try{
-            await login({
+            const response = await login({
                 email:inputUsername,
                 password:inputPassword
             });
+            localStorage.setItem('userEmail', response.data.email);
+            console.log(response.data.email);
             handleNavigateToHome();
         } catch(err) {
             if (err.response?.data?.message === "No user found with this email" ||
@@ -41,9 +43,9 @@ const Login = () => {
 
     const handlePassword = () => {};
 
-    function delay(ms) {
+    /*function delay(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
-    }
+    }*/
 
     const handleNavigateToHome = () => {
         navigate(`/Home`);

@@ -7,11 +7,10 @@ import com.project.taskmanager.domain.entities.Utilisateur;
 import com.project.taskmanager.mappers.TaskListMapper;
 import com.project.taskmanager.services.TaskListService;
 import com.project.taskmanager.services.UtilisateurService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 //@RequestMapping(path = "/task-lists")
@@ -63,14 +62,20 @@ public class TaskListController {
         return taskListMapper.toDto(newTaskList);
     }
     @DeleteMapping(path ="/task-lists/{task_list_id}")
-    public void deleteTaskList(@PathVariable("task_list_id") UUID taskListId) {
+    public ResponseEntity<Map<String,String>> deleteTaskList(@PathVariable("task_list_id") UUID taskListId) {
         taskListService.deleteTaskList(taskListId);
+
+        Map<String,String> response = new HashMap<>();
+        response.put("message", "tasklist deleted successfully");
+        response.put("taskListId", taskListId.toString());
+        return ResponseEntity.ok(response);
     }
 
     /*New Method*/
-    @GetMapping(path="/utilisateurs/{user_id}/task-lists")
-    public List<TaskListDto> getTaskListByAuthor(@PathVariable("user_id") UUID authorId){
-        return taskListService.getTaskListByAuthor(authorId)
+    @GetMapping(path="/task-lists/{user_email}/")
+    public List<TaskListDto> getTaskListByAuthor(@PathVariable("user_email") String userEmail){
+        Utilisateur utilisateur = utilisateurService.getUtilisateurByEmail(userEmail);
+        return taskListService.getTaskListByAuthor(utilisateur.getId())
                 .stream()
                 .map(taskListMapper::toDto)
                 .toList();
@@ -78,15 +83,20 @@ public class TaskListController {
 
     /*New Method*/
     @PostMapping(path="/task-lists/{task_list_id}/members")
-    public void addUserToTaskList(@PathVariable("task_list_id") UUID taskListId, @RequestBody Utilisateur utilisateur ){
+    public ResponseEntity<Map<String,String>> addUserToTaskList(@PathVariable("task_list_id") UUID taskListId, @RequestBody Utilisateur utilisateur ){
         TaskList taskList = taskListService.getTaskListById(taskListId)
                 .orElseThrow(()->new IllegalArgumentException("tasklist not found with Id"+ taskListId));
         utilisateurService.addUserToTaskList(utilisateur, taskList);
 
+        Map<String,String> response = new HashMap<>();
+        response.put("message", "Member added to tasklist successfully");
+        response.put("taskListId", taskListId.toString());
+
+        return ResponseEntity.ok(response);
     }
     /*New Method*/
     @DeleteMapping(path="/task-lists/{task_list_id}/members/{member_id}")
-    public void DeleteUserFromTaskList(@PathVariable("task_list_id") UUID taskListId,@PathVariable("member_id") UUID utilisateurId ){
+    public ResponseEntity<Map<String,String>> DeleteUserFromTaskList(@PathVariable("task_list_id") UUID taskListId,@PathVariable("member_id") UUID utilisateurId ){
         TaskList taskList = taskListService.getTaskListById(taskListId)
                 .orElseThrow(()->new IllegalArgumentException("tasklist not found with Id"+ taskListId));
 
@@ -94,6 +104,20 @@ public class TaskListController {
                 .orElseThrow(()->new IllegalArgumentException("User not found with Id"+ utilisateurId));;
         utilisateurService.removeUserFromTaskList(utilisateur, taskList);
 
+        Map<String,String> response = new HashMap<>();
+        response.put("message", "Member deleted from tasklist successfully");
+        response.put("taskListId", taskListId.toString());
+
+        return ResponseEntity.ok(response);
+    }
+    /*New Method*/
+    @GetMapping(path="/utilisateurs/member_id/tasklists")
+    public List<TaskListDto> getTaskListByMember(@PathVariable("member_id") UUID memberId){
+        //Utilisateur utilisateur = utilisateurService.getUtilisateurByEmail(userEmail);
+        return taskListService.getTaskListByMember(memberId)
+                .stream()
+                .map(taskListMapper::toDto)
+                .toList();
     }
 
 }

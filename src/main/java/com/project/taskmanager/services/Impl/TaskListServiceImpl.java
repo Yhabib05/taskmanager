@@ -6,7 +6,6 @@ import com.project.taskmanager.repositories.TaskListRepository;
 import com.project.taskmanager.repositories.UtilisateurRepository;
 import com.project.taskmanager.services.TaskListService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -40,10 +39,16 @@ public class TaskListServiceImpl implements TaskListService {
         if (null==taskList.getTitle() || taskList.getTitle().isBlank()){
             throw new IllegalArgumentException("Task list title should not be null !");
         }
-
+        if (taskList.getAuthor() == null || taskList.getAuthor().getEmail() ==null) {
+            throw new IllegalArgumentException("Task list must have a valid author ");
+        }
         // Fetch the full Utilisateur object using the id
-        Utilisateur author = utilisateurRepository.findById(taskList.getAuthor().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Author not found with the provided id"));
+        Utilisateur author = utilisateurRepository.findByEmail(taskList.getAuthor().getEmail());
+
+        if(author==null){
+            throw new IllegalArgumentException("Author not found with the provided email");
+        }
+
 
         LocalDate now = LocalDate.now();
         return taskListRepository.save(new TaskList(
@@ -88,8 +93,9 @@ public class TaskListServiceImpl implements TaskListService {
 
     @Override
     public List<TaskList> getTaskListByMember(UUID memberId) {
-        return List.of();
+        return taskListRepository.findProjetByMemberId(memberId);
     }
+
 
     @Override
     public List<TaskList> getTaskListByAuthor(UUID authorId) {

@@ -5,10 +5,12 @@ const TaskListForm = ({ onSubmit, initialData = {}, onCancel }) => {
     const [id] = useState(initialData.id || null); // Preserve the ID if provided
     const [title, setTitle] = useState(initialData.title || '');
     const [description, setDescription] = useState(initialData.description || '');
+    const authorEmail = localStorage.getItem('userEmail');
+    //const [author, setAuthor] = useState(initialData.author );
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit({ id, title, description });
+        onSubmit({ id, title, description, author:{email:authorEmail} });
         if (!id) {
             setTitle('');
             setDescription('');

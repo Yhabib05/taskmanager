@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTaskLists, getTaskListById ,createTaskList, updateTaskList , deleteTaskList } from '../../api/taskListApi';
+import { getTaskLists, getTaskListsByAuthor, getTaskListById ,createTaskList, updateTaskList , deleteTaskList } from '../../api/taskListApi';
 import TaskListForm from "./TaskListForm";
 import AppNavBar from "../UI/Navbar"
 import CloseButton from "react-bootstrap/CloseButton";
 import ProgressBar from "react-bootstrap/ProgressBar"
 
 import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
-import {getTaskListsByAuthor} from "../../api/userApi";
 
 const TaskLists = () => {
     const [taskLists, setTaskLists] = useState([]);
@@ -17,6 +16,9 @@ const TaskLists = () => {
     const [isLoading,setIsLoading] = useState(false);
 
     const navigate =useNavigate();
+
+    const userEmail = localStorage.getItem('userEmail');
+
 
     useEffect(() => {
         fetchTaskListsByAuthor();
@@ -37,9 +39,14 @@ const TaskLists = () => {
 */
 
     const fetchTaskListsByAuthor = async () => {
+
         setIsLoading(true);
+        if (!userEmail) {
+            console.error("User email not found. Ensure the user is logged in.");
+            return;
+        }
         try{
-            const { data } = await getTaskListsByAuthor();
+            const { data } = await getTaskListsByAuthor(userEmail);
             setTaskLists(data);
         } catch (e){
             console.error("Error while fetching tasklists for user ",e);
@@ -158,7 +165,7 @@ const TaskLists = () => {
                                         initialData={{
                                             id: list.id,
                                             title: list.title,
-                                            description: list.description,
+                                            description: list.description
                                         }}
                                     />
                                 )}
