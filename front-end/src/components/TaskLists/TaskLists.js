@@ -64,6 +64,7 @@ const TaskLists = () => {
 
     const handleDelete = async (id) => {
         await deleteTaskList(id);
+        setTaskList(null);
         fetchTaskListsByAuthor();
     };
 
