@@ -7,8 +7,10 @@ import com.project.taskmanager.domain.entities.Utilisateur;
 import com.project.taskmanager.mappers.TaskListMapper;
 import com.project.taskmanager.services.TaskListService;
 import com.project.taskmanager.services.UtilisateurService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -86,6 +88,10 @@ public class TaskListController {
     public ResponseEntity<Map<String,String>> addUserToTaskList(@PathVariable("task_list_id") UUID taskListId, @RequestBody Utilisateur utilisateur ){
         TaskList taskList = taskListService.getTaskListById(taskListId)
                 .orElseThrow(()->new IllegalArgumentException("tasklist not found with Id"+ taskListId));
+
+        if (utilisateurService.getUtilisateurByEmail(utilisateur.getEmail()) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+        }
         utilisateurService.addUserToTaskList(utilisateur, taskList);
 
         Map<String,String> response = new HashMap<>();

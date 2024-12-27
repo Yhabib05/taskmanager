@@ -103,7 +103,11 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     @Override
     public void addUserToTaskList(Utilisateur utilisateur, TaskList taskList) {
-        taskList.getUtilisateurs().add(utilisateur);
+        Utilisateur existingUser = utilisateurRepository.findByEmail(utilisateur.getEmail());
+        if (existingUser==null){
+            throw new IllegalArgumentException("User does not exist");
+        }
+        taskList.getUtilisateurs().add(existingUser);
         taskListRepository.save(taskList);
     }
 

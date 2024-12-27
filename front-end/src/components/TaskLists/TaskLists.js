@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTaskLists, getTaskListsByAuthor, getTaskListById ,createTaskList, updateTaskList , deleteTaskList } from '../../api/taskListApi';
+import {
+    getTaskLists,
+    getTaskListsByAuthor,
+    getTaskListById,
+    createTaskList,
+    updateTaskList,
+    deleteTaskList,
+    getTaskListMembers, addUserToTaskList, deleteUserFromTaskList
+} from '../../api/taskListApi';
 import TaskListForm from "./TaskListForm";
 import AppNavBar from "../UI/Navbar"
 import CloseButton from "react-bootstrap/CloseButton";
 import ProgressBar from "react-bootstrap/ProgressBar"
 
-import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
+import { Modal, Form, Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
 
 const TaskLists = () => {
     const [taskLists, setTaskLists] = useState([]);
@@ -14,9 +22,11 @@ const TaskLists = () => {
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskListForm visibility
     const [isUpdating , setIsUpdating] = useState(null);
     const [isLoading,setIsLoading] = useState(false);
-
+    const [taskListMembers,setTaskListMembers] =useState([]);
+    const [membersModal, setMembersModal] = useState({ show: false, taskListId: null });
+    const [newMemberEmail,setNewMemberEmail]=useState("");
     const navigate =useNavigate();
-
+    const [addMemberError,setAddMemberError]=useState("");
     const userEmail = localStorage.getItem('userEmail');
 
 
@@ -101,6 +111,58 @@ const TaskLists = () => {
         }
     };
 
+    const fetchTaskListMembers = async (taskListId) => {
+        setIsLoading(true);
+        try{
+            const{data}=await getTaskListMembers(taskListId);
+            setTaskListMembers(data);
+        } catch(e){
+            console.error("error fetching task list members: ",e);
+        }
+        finally {
+            setIsLoading(false);
+        }
+
+    }
+
+    const handleAddMember = async () => {
+        try {
+            const {data} = await addUserToTaskList(membersModal.taskListId, {email: newMemberEmail});
+            setNewMemberEmail("");
+            setAddMemberError("");
+            fetchTaskListMembers(membersModal.taskListId);
+        } catch (err) {
+            if (err.response?.status === 404) {
+                // Handle the "user not found" or "tasklist not found" error
+                setAddMemberError(err.response?.data?.message || "User or tasklist not found");
+            } else {
+                // Log other unexpected errors
+                console.error("Error adding member to task list:", err);
+                setAddMemberError("An unexpected error occurred. Please try again.");
+            }
+        }
+    }
+
+    const handleRemoveMember = async (memberId) => {
+        try {
+            await deleteUserFromTaskList(membersModal.taskListId, memberId);
+            fetchTaskListMembers(membersModal.taskListId);
+        } catch (e) {
+            console.error("Error removing member:", e);
+        }
+    };
+
+    const handleShowMembersModal = (tasklistId) => {
+        setMembersModal({show:true,taskListId:tasklistId});
+        fetchTaskListMembers(tasklistId);
+    };
+
+    const handleCloseMembersModal = () => {
+        setMembersModal({show:false,taskListId:null});
+        setTaskListMembers([]);
+    };
+
+
     return (
         <div>
             <AppNavBar />
@@ -154,8 +216,16 @@ const TaskLists = () => {
                                                 Details
                                             </Button>
                                         </div>
-                                        <div className="mt-3" >
-                                            <ProgressBar now={list.progress*100} label={`${list.progress*100}%`} />
+                                        <div className="d-flex justify-content-end mt-3">
+                                            <Button
+                                                variant="info"
+                                                onClick={() => handleShowMembersModal(list.id)}
+                                            >
+                                                Manage Members
+                                            </Button>
+                                        </div>
+                                        <div className="mt-3">
+                                            <ProgressBar now={list.progress * 100} label={`${list.progress * 100}%`}/>
                                         </div>
                                     </Card.Body>
                                 </Card>
@@ -174,7 +244,54 @@ const TaskLists = () => {
                         ))}
                     </Row>
                 )}
-
+                {membersModal.show && (
+                    <Modal show={membersModal.show} onHide={handleCloseMembersModal} centered size="lg">
+                        <Modal.Header closeButton>
+                            <Modal.Title>Manage Members</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form className="mb-3" onSubmit={(e) => {
+                                e.preventDefault(); // Prevent default form submission behavior
+                                if (!newMemberEmail.trim()) {
+                                    setAddMemberError("Email cannot be empty.");
+                                    return;
+                                }
+                                handleAddMember(); // Only call handleAddMember when input is valid
+                            }}>
+                                <Form.Group controlId="newMemberEmail" className="mb-4">
+                                    <Form.Label>Add Member</Form.Label>
+                                    <Form.Control
+                                        type="email"
+                                        placeholder="Enter member's email"
+                                        value={newMemberEmail}
+                                        onChange={(e) =>{
+                                            setNewMemberEmail(e.target.value);
+                                            setAddMemberError("");
+                                        }}
+                                        required
+                                    />
+                                    {addMemberError && <small className="text-danger">{addMemberError}</small>}
+                                </Form.Group>
+                                <Button
+                                    variant="primary"
+                                    //onClick={handleAddMember}
+                                    type="submit"
+                                >
+                                    Add Member
+                                </Button>
+                            </Form>
+                            <h5>Current Members</h5>
+                            <ul className="list-group">
+                                {taskListMembers.map((member) => (
+                                    <li key={member.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                        {member.email}
+                                        <Button variant="danger" size="sm" onClick={() => handleRemoveMember(member.id)}>Remove</Button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </Modal.Body>
+                    </Modal>
+                )}
                 {taskList && (
                     <div style={{
                         position: 'relative',
