@@ -5,13 +5,8 @@ import TaskForm from './TaskForm';
 import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
 import CloseButton from 'react-bootstrap/CloseButton';
-import { Spinner, Card, Button, Row, Col, Container } from "react-bootstrap";
+import {Spinner, Card, Button, Row, Col, Container, Modal} from "react-bootstrap";
 import {getTaskListById} from "../../api/taskListApi";
-
-
-
-
-
 
 const Tasks = () => {
     // the useParams extract "task_list_id" from the route :<Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
@@ -93,6 +88,12 @@ const Tasks = () => {
         await fetchTasks(); // Refresh the tasks list
     };
 
+    const tasksByStatus = {
+        OPEN: tasks.filter((task) => task.status === 'OPEN'),
+        INPROCESS: tasks.filter((task) => task.status === 'INPROCESS'),
+        CLOSED: tasks.filter((task) => task.status === 'CLOSED'),
+    };
+
     return (
         <div>
             <AppNavBar />
@@ -113,101 +114,81 @@ const Tasks = () => {
                     </div>
                 ) : (
                     <Row className="mt-4">
-                        {tasks.map((task) => {
-                            let cardBorderColor;
-                            switch (task.priority) {
-                                case 'LOW':
-                                    cardBorderColor = 'success';
-                                    break;
-                                case 'MEDIUM':
-                                    cardBorderColor = 'warning'; //yellow
-                                    break;
-                                case 'HIGH':
-                                    cardBorderColor = 'danger'; //red
-                                    break;
-                                default :
-                                    cardBorderColor = 'secondary'; //grey
-                            }
-                            return (
-                                <Col key={task.id} md={4} className="mb-4">
-                                    <Card border={cardBorderColor}>
-                                        <Card.Header as="h5">{taskListTitle}</Card.Header>
-                                        <Card.Body>
-                                            <Card.Title>{task.title}</Card.Title>
-                                            <Card.Text>
-                                                {task.description || 'No description available.'}
-                                            </Card.Text>
-                                            <p>
-                                                <strong>Priority:</strong> {task.priority} <br/>
-                                                <strong>Due Date:</strong> {task.dueDate || 'N/A'}
-                                            </p>
-                                            <div className="d-flex justify-content-between">
-                                                <Button
-                                                    variant="primary"
-                                                    onClick={() => setIsUpdating(task.id)}
-                                                >
-                                                    Update
-                                                </Button>
-                                                <Button
-                                                    variant="warning"
-                                                    onClick={() => handleGetById(task.id)}
-                                                >
-                                                    Details
-                                                </Button>
-                                                <Button
-                                                    variant="danger"
-                                                    onClick={() => handleDelete(task.id)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                            {isUpdating === task.id && (
-                                                <div style={{marginTop: '20px'}}>
-                                                    <TaskForm
-                                                        onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
-                                                        onCancel={() => setIsUpdating(null)}
-                                                        initialData={{
-                                                            id: task.id,
-                                                            title: task.title,
-                                                            description: task.description,
-                                                            priority: task.priority,
-                                                            dueDate: task.dueDate,
-                                                            status: task.status,
-                                                        }}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            );
-                        })}
+                        {['OPEN', 'INPROCESS', 'CLOSED'].map((status)=>
+                        (
+                            <Col key={status} md={4} className="mb-4">
+                                <div className="p-3 bg-dark text-white rounded-4 shadow">
+                                    <h3 className="text-center text-success">{status}</h3>
+                                    {tasksByStatus[status].length > 0 ? (
+                                        tasksByStatus[status].map((task) => (
+                                            <Card
+                                                key={task.id}
+                                                className="mb-3 bg-dark text-white rounded shadow-sm position-relative"
+                                            >
+                                                <div
+                                                    style={{
+                                                        height: '6px', // Height of the bar
+                                                        width: '50px', // Width of the bar
+                                                        backgroundColor:
+                                                            task.priority === 'HIGH'
+                                                                ? '#dc3545' // Red for high priority
+                                                                : task.priority === 'MEDIUM'
+                                                                    ? '#ffc107' // Yellow for medium priority
+                                                                    : '#198754', // Green for low priority
+                                                        borderRadius: '3px', // Rounded edges for the bar
+                                                        margin: '10px auto', // Center the bar horizontally
+                                                    }}
+                                                ></div>
+                                                <Card.Body>
+                                                    <Card.Title>{task.title}</Card.Title>
+                                                    <Card.Text>
+                                                        {task.description || 'No description available.'}
+                                                    </Card.Text>
+                                                    <p>
+                                                        {/*<strong>Priority:</strong> {task.priority} <br/>*/}
+                                                        <strong>Due Date:</strong> {task.dueDate || 'N/A'}
+                                                    </p>
+                                                    {/*<div className="task-user-circle bg-secondary text-center">
+                                                        {task.assignedUserInitials || 'N/A'}
+                                                    </div>*/}
+                                                    <div className="d-flex justify-content-between">
+                                                        <Button
+                                                            variant="primary"
+                                                            onClick={() => setIsUpdating(task.id)}
+                                                        >
+                                                            Update
+                                                        </Button>
+                                                        <Button
+                                                            variant="warning"
+                                                            onClick={() => handleGetById(task.id)}
+                                                        >
+                                                            Details
+                                                        </Button>
+                                                        <Button
+                                                            variant="danger"
+                                                            onClick={() => handleDelete(task.id)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </div>
+                                                    {isUpdating === task.id && (
+                                                        <TaskForm
+                                                            onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
+                                                            onCancel={() => setIsUpdating(null)}
+                                                            initialData={task}
+                                                        />
+                                                    )}
+                                                </Card.Body>
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        // Display placeholder if no tasks
+                                        <p className="text-center">No tasks in this category.</p>
+                                    )}
+                                </div>
+                            </Col>
+                        ))}
                     </Row>
-                )}
-                {task && (
-                    <div
-                        style={{
-                            position: 'relative',
-                            marginTop: '20px',
-                            padding: '10px',
-                            border: '1px solid #ccc',
-                        }}
-                    >
-                        <CloseButton
-                            onClick={() => setTask(null)}
-                            style={{
-                                position: 'absolute',
-                                top: '10px',
-                                right: '10px',
-                            }}
-                        />
-                        <h2>Task Details</h2>
-                        <p><strong>Title:</strong> {task.title}</p>
-                        <p><strong>Description:</strong> {task.description}</p>
-                        <p><strong>Priority:</strong> {task.priority}</p>
-                        <p><strong>Status:</strong> {task.status}</p>
-                        <p><strong>Due Date:</strong> {task.dueDate || 'N/A'}</p>
-                    </div>
                 )}
                 <div style={{ marginTop: '20px' }}>
                     {isAdding ? (
@@ -222,6 +203,27 @@ const Tasks = () => {
                     )}
                 </div>
             </Container>
+            {task && (
+                <Modal show={!!task} onHide={()=>setTask(null)} centered >
+                    <Modal.Header closeButton>
+                        <Modal.Title>Task Details</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <h2>Task Details</h2>
+                        <p><strong>Title:</strong> {task.title}</p>
+                        <p><strong>Description:</strong> {task.description}</p>
+                        <p><strong>Priority:</strong> {task.priority}</p>
+                        <p><strong>Status:</strong> {task.status}</p>
+                        <p><strong>Due Date:</strong> {task.dueDate || 'N/A'}</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setTask(null)}>
+                            Close
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            )}
+
         </div>
     );
 };

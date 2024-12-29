@@ -91,6 +91,7 @@ const TaskForm = ({ onSubmit, initialData = {}, onCancel }) => {
                         onChange={(e) => setStatus(e.target.value)}
                     >
                         <option value="OPEN">Open</option>
+                        <option value="INPROCESS">In Process</option>
                         <option value="CLOSED">Closed</option>
                     </Form.Select>
                 </Form.Group>
