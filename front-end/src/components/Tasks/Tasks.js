@@ -6,7 +6,7 @@ import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
 import CloseButton from 'react-bootstrap/CloseButton';
 import {Spinner, Card, Button, Row, Col, Container, Modal, Form} from "react-bootstrap";
-import {getTaskListById} from "../../api/taskListApi";
+import {getTaskListById, getTaskListMembers} from "../../api/taskListApi";
 
 const Tasks = () => {
     // the useParams extract "task_list_id" from the route :<Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
@@ -19,10 +19,13 @@ const Tasks = () => {
     const [isUpdating, setIsUpdating] = useState(null);//we store the task id being updated
     const [isLoading,setIsLoading] = useState(false);
     const [isAddingWithStatus, setIsAddingWithStatus] = useState(null);
+    const [taskListMembers,setTaskListMembers] =useState([]);
+
 
     useEffect(() => {
         fetchTasks();
         fetchTaskListTitle();
+        fetchTaskListMembers();
     }, [task_list_id]);
 
     const fetchTasks = async () => {
@@ -43,6 +46,20 @@ const Tasks = () => {
         } catch {
             console.error("tasklist title can't be fetched");
         }
+    }
+
+    const fetchTaskListMembers = async (task_list_id) => {
+        setIsLoading(true);
+        try{
+            const{data}=await getTaskListMembers(task_list_id);
+            setTaskListMembers(data);
+        } catch(e){
+            console.error("error fetching task list members: ",e);
+        }
+        finally {
+            setIsLoading(false);
+        }
+
     }
 
     const handleGetById =async (task_id) => {
@@ -100,8 +117,8 @@ const Tasks = () => {
     return (
         <div>
             <AppNavBar />
-            <Container>
-                <h1 className="text-center mt-4">Tasks of <span style={{color: '#007bff'}}>{taskListTitle}</span> </h1>
+            <Container fluid>
+                <h1 className="text-center mt-4">Tasks of <span style={{color: '#007bff'}}>{taskListTitle}</span></h1>
                 {isLoading ? (
                     <div
                         style={{
@@ -117,147 +134,192 @@ const Tasks = () => {
                     </div>
                 ) : (
                     <Row className="mt-4">
-                        {['OPEN', 'INPROCESS', 'CLOSED'].map((status)=>
-                        (
-                            <Col key={status} md={4} className="mb-4">
-                                <div className="p-3 bg-dark text-white rounded-4 shadow">
-                                    <h3 className="text-center text-success">{status}</h3>
-                                    {tasksByStatus[status].length > 0 ? (
-                                        tasksByStatus[status].map((task) => (
-                                            <Card
-                                                key={task.id}
-                                                className="mb-3 bg-dark text-white rounded shadow-sm position-relative"
-                                            >
-                                                <div
-                                                    style={{
-                                                        height: '6px', // Height of the bar
-                                                        width: '50px', // Width of the bar
-                                                        backgroundColor:
-                                                            task.priority === 'HIGH'
-                                                                ? '#dc3545' // Red for high priority
-                                                                : task.priority === 'MEDIUM'
-                                                                    ? '#ffc107' // Yellow for medium priority
-                                                                    : '#198754', // Green for low priority
-                                                        borderRadius: '3px', // Rounded edges for the bar
-                                                        margin: '10px auto', // Center the bar horizontally
-                                                    }}
-                                                ></div>
-                                                <Card.Body>
-                                                    <Card.Title>{task.title}</Card.Title>
-                                                    <Card.Text>
-                                                        {task.description || 'No description available.'}
-                                                    </Card.Text>
-                                                    <p>
-                                                        {/*<strong>Priority:</strong> {task.priority} <br/>*/}
-                                                        <strong>Due Date:</strong> {task.dueDate || 'N/A'}
-                                                    </p>
-                                                    {/*<div className="task-user-circle bg-secondary text-center">
-                                                        {task.assignedUserInitials || 'N/A'}
-                                                    </div>*/}
-                                                    <div className="d-flex justify-content-between">
-                                                        <Button
-                                                            variant="primary"
-                                                            onClick={() => setIsUpdating(task.id)}
-                                                        >
-                                                            Update
-                                                        </Button>
-                                                        <Button
-                                                            variant="warning"
-                                                            onClick={() => handleGetById(task.id)}
-                                                        >
-                                                            Details
-                                                        </Button>
-                                                        <Button
-                                                            variant="danger"
-                                                            onClick={() => handleDelete(task.id)}
-                                                        >
-                                                            Delete
-                                                        </Button>
-                                                    </div>
-                                                    {isUpdating === task.id && (
-                                                        <TaskForm
-                                                            onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
-                                                            onCancel={() => setIsUpdating(null)}
-                                                            initialData={task}
-                                                        />
-                                                    )}
-                                                </Card.Body>
-                                            </Card>
-                                        ))
-                                    ) : (
-                                        <>
-                                            {isAddingWithStatus===status ? (
-                                                /*
-                                                                                            status is set by default to the one of the column, and the others are set by default also, the user can only choose title
-                                                */
-                                                <Form onSubmit={(e) => {
-                                                    e.preventDefault();
-                                                    handleCreate({
-                                                        title: e.target.elements.title.value,
-                                                        description: e.target.elements.description.value,
-                                                        status, // Predefined status for the column
-                                                        priority: 'MEDIUM', // Default priority
-                                                        dueDate: e.target.elements.dueDate.value, // Default due date
-                                                    });
-                                                    setIsAddingWithStatus(null);
-                                                }}>
-                                                    <Form.Group controlId="taskTitle" className="mb-3">
-                                                        <Form.Label>Title</Form.Label>
-                                                        <Form.Control
-                                                            type="text"
-                                                            placeholder="Enter task title"
-                                                            name="title"
-                                                            //onChange={(e) => setTitle(e.target.value)}
-                                                            required
-                                                        />
-                                                    </Form.Group>
-                                                    <Form.Group controlId="taskDescription" className="mb-3">
-                                                        <Form.Label>Description</Form.Label>
-                                                        <Form.Control
-                                                            as="textarea"
-                                                            rows={2}
-                                                            placeholder="Enter task description"
-                                                            name="description"
-                                                        />
-                                                    </Form.Group>
-                                                    <Form.Group controlId="taskDueDate" className="mb-3">
-                                                        <Form.Label>Due Date</Form.Label>
-                                                        <Form.Control
-                                                            type="date"
-                                                            name="dueDate"
-                                                            //onChange={(e) => setDueDate(e.target.value)}
-                                                            min={new Date().toISOString().split('T')[0]}
-                                                        />
-                                                    </Form.Group>
-                                                    <div className="d-flex justify-content-between">
-                                                        <Button type="submit" variant="primary">
-                                                            Add a Task
-                                                        </Button>
-                                                        <Button
-                                                            variant="secondary"
-                                                            onClick={() => setIsAddingWithStatus(null)}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                    </div>
-                                                </Form>
-                                            ) : (
-                                                <Button variant="success" onClick={() => {
-                                                    console.log(`the status is : ${status}`);
-                                                    setIsAddingWithStatus(status)}
-                                                }>
-                                                    Add a Task
-                                                </Button>
-                                            )}
-                                        </>
+                        <Col md={9}>
+                            <div className="bg-light p-3 rounded shadow position-relative">
+                                <Button
+                                    variant="warning"
+                                    className="position-absolute"
+                                    style={{
+                                        top: '0px', // Adjust this value for vertical positioning
+                                        right: '4px', // Adjust this value for horizontal positioning
+                                        fontSize: '2rem', // Adjust the size of the "+"
+                                        //color: 'green', // Set the color for the "+"
+                                        padding: '0', // Remove extra padding for precise placement
+                                        border: 'none', // Remove any borders
+                                        background: 'none', // Ensure background is transparent
+                                    }}
+                                    onClick={() => setIsAdding(true)}>
+                                    +
+                                </Button>
 
-                                    )}
-                                </div>
-                            </Col>
-                        ))}
+                                <Row className="mt-4">
+                                    {['OPEN', 'INPROCESS', 'CLOSED'].map((status) =>
+                                        (
+                                            <Col key={status} md={4} className="mb-4">
+                                                <div className="p-3 bg-dark text-white rounded-4 shadow">
+                                                    <h3 className="text-center text-success">{status}</h3>
+                                                    {tasksByStatus[status].length > 0 ? (
+                                                        tasksByStatus[status].map((task) => (
+                                                            <Card
+                                                                key={task.id}
+                                                                className="mb-3 shadow-sm bg-dark text-white rounded"
+                                                            >
+                                                                <div
+                                                                    className={`w-100 py-1 rounded-top ${
+                                                                        task.priority === 'HIGH'
+                                                                            ? 'bg-danger'
+                                                                            : task.priority === 'MEDIUM'
+                                                                                ? 'bg-warning'
+                                                                                : 'bg-success'
+                                                                    }`}
+                                                                ></div>
+                                                                <Card.Body>
+                                                                    <h5 className="card-title">{task.title}</h5>
+                                                                    <p className="card-text">{task.description || 'No description available.'}</p>
+                                                                    <p className="text-muted mb-2">
+                                                                        <strong>Due
+                                                                            Date:</strong> {task.dueDate || 'N/A'}
+                                                                    </p>
+                                                                    {/*<div className="task-user-circle bg-secondary text-center">
+                                                            {task.assignedUserInitials || 'N/A'}
+                                                        </div>*/}
+                                                                    <div className="d-flex justify-content-between">
+                                                                        <Button size="sm" variant="primary"
+                                                                                onClick={() => setIsUpdating(task.id)}
+                                                                        >
+                                                                            Update
+                                                                        </Button>
+                                                                        <Button size="sm" variant="warning"
+                                                                                onClick={() => handleGetById(task.id)}>
+                                                                            Details
+                                                                        </Button>
+                                                                        <Button size="sm" variant="danger"
+                                                                                onClick={() => handleDelete(task.id)}>
+                                                                            Delete
+                                                                        </Button>
+                                                                    </div>
+                                                                    {isUpdating === task.id && (
+                                                                        <TaskForm
+                                                                            onSubmit={(newTaskData) => handleUpdate(newTaskData, task.id)}
+                                                                            onCancel={() => setIsUpdating(null)}
+                                                                            initialData={task}
+                                                                        />
+                                                                    )}
+                                                                </Card.Body>
+                                                            </Card>
+                                                        ))
+                                                    ) : (
+                                                        <>
+                                                            {isAddingWithStatus === status ? (
+                                                                /*
+                                                                                                            status is set by default to the one of the column, and the others are set by default also, the user can only choose title
+                                                                */
+                                                                <Form onSubmit={(e) => {
+                                                                    e.preventDefault();
+                                                                    handleCreate({
+                                                                        title: e.target.elements.title.value,
+                                                                        description: e.target.elements.description.value,
+                                                                        status, // Predefined status for the column
+                                                                        priority: 'MEDIUM', // Default priority
+                                                                        dueDate: e.target.elements.dueDate.value, // Default due date
+                                                                    });
+                                                                    setIsAddingWithStatus(null);
+                                                                }}>
+                                                                    <Form.Group controlId="taskTitle" className="mb-3">
+                                                                        <Form.Label>Title</Form.Label>
+                                                                        <Form.Control
+                                                                            type="text"
+                                                                            placeholder="Enter task title"
+                                                                            name="title"
+                                                                            //onChange={(e) => setTitle(e.target.value)}
+                                                                            required
+                                                                        />
+                                                                    </Form.Group>
+                                                                    <Form.Group controlId="taskDescription"
+                                                                                className="mb-3">
+                                                                        <Form.Label>Description</Form.Label>
+                                                                        <Form.Control
+                                                                            as="textarea"
+                                                                            rows={2}
+                                                                            placeholder="Enter task description"
+                                                                            name="description"
+                                                                        />
+                                                                    </Form.Group>
+                                                                    <Form.Group controlId="taskDueDate"
+                                                                                className="mb-3">
+                                                                        <Form.Label>Due Date</Form.Label>
+                                                                        <Form.Control
+                                                                            type="date"
+                                                                            name="dueDate"
+                                                                            //onChange={(e) => setDueDate(e.target.value)}
+                                                                            min={new Date().toISOString().split('T')[0]}
+                                                                        />
+                                                                    </Form.Group>
+                                                                    <div className="d-flex justify-content-between">
+                                                                        <Button type="submit" variant="primary">
+                                                                            Add a Task
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="secondary"
+                                                                            onClick={() => setIsAddingWithStatus(null)}
+                                                                        >
+                                                                            Cancel
+                                                                        </Button>
+                                                                    </div>
+                                                                </Form>
+                                                            ) : (
+                                                                <Button variant="success" onClick={() => {
+                                                                    console.log(`the status is : ${status}`);
+                                                                    setIsAddingWithStatus(status)
+                                                                }
+                                                                }>
+                                                                    Add a Task
+                                                                </Button>
+                                                            )}
+                                                        </>
+
+                                                    )}
+                                                </div>
+                                            </Col>
+                                        ))}
+                                </Row>
+                            </div>
+                        </Col>
+                        {/*Members*/}
+                        <Col md={3}>
+                            <div className="bg-light p-3 rounded shadow-sm">
+                                {/*<Button
+                                    variant="warning"
+                                    className="position-absolute"
+                                    style={{
+                                        top: '0px', // Adjust this value for vertical positioning
+                                        right: '4px', // Adjust this value for horizontal positioning
+                                        fontSize: '2rem', // Adjust the size of the "+"
+                                        //color: 'green', // Set the color for the "+"
+                                        padding: '0', // Remove extra padding for precise placement
+                                        border: 'none', // Remove any borders
+                                        background: 'none', // Ensure background is transparent
+                                    }}
+                                    onClick={() => setAddMembers(true)}>
+                                    +
+                                </Button>*/}
+                                <h4 className="text-center mb-4">Members</h4>
+                                {taskListMembers.length > 0 ? (
+                                    <ul className="list-group">
+                                        {taskListMembers.map((member) => (
+                                            <li key={member.id} className="list-group-item d-flex align-items-center">
+                                                <span>{member.email}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-center">No members found...</p>
+                                )}
+                            </div>
+                        </Col>
                     </Row>
                 )}
-                <div style={{ marginTop: '20px' }}>
+                <div style={{marginTop: '20px'}}>
                     {isAdding ? (
                         <TaskForm
                             onSubmit={handleCreate}
@@ -271,7 +333,7 @@ const Tasks = () => {
                 </div>
             </Container>
             {task && (
-                <Modal show={!!task} onHide={()=>setTask(null)} centered >
+                <Modal show={!!task} onHide={() => setTask(null)} centered>
                     <Modal.Header closeButton>
                         <Modal.Title>Task Details</Modal.Title>
                     </Modal.Header>
