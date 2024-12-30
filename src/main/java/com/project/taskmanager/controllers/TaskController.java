@@ -4,6 +4,7 @@ import com.project.taskmanager.domain.dto.TaskDto;
 import com.project.taskmanager.domain.entities.Task;
 import com.project.taskmanager.mappers.TaskMapper;
 import com.project.taskmanager.services.TaskService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,10 +32,11 @@ public class TaskController {
     }
 
     @PostMapping
-    public TaskDto createTask(@PathVariable("task_list_id") UUID taskListId,
-                              @RequestBody TaskDto taskDto) {
+    public ResponseEntity<TaskDto> createTask(@PathVariable("task_list_id") UUID taskListId,
+                                              @RequestBody TaskDto taskDto) {
         Task task = taskService.createTask(taskListId, taskMapper.fromDto(taskDto));
-        return taskMapper.toDto(task);
+        TaskDto createdTask = taskMapper.toDto(task);
+        return ResponseEntity.status(201).body(createdTask);
     }
 
     @GetMapping("/{task_id}")

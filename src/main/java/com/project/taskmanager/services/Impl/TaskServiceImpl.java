@@ -46,7 +46,10 @@ public class TaskServiceImpl implements TaskService {
         }
         TaskPriority taskPriority = Optional.ofNullable(task.getPriority()).orElse(TaskPriority.MEDIUM);
 
-        Status status = Status.OPEN;
+        if (task.getStatus() == null){
+            task.setStatus(Status.OPEN);
+        }
+
         TaskList taskList = taskListRepository.findById(taskListId)
                 .orElseThrow(() -> new IllegalArgumentException("Tasklist does not exist !"));
 
@@ -56,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
                 task.getTitle(),
                 task.getDescription(),
                 task.getDueDate(),
-                status,
+                task.getStatus(),
                 taskPriority,
                 now,
                 now,

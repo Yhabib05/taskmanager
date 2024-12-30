@@ -5,7 +5,7 @@ import TaskForm from './TaskForm';
 import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
 
 import CloseButton from 'react-bootstrap/CloseButton';
-import {Spinner, Card, Button, Row, Col, Container, Modal} from "react-bootstrap";
+import {Spinner, Card, Button, Row, Col, Container, Modal, Form} from "react-bootstrap";
 import {getTaskListById} from "../../api/taskListApi";
 
 const Tasks = () => {
@@ -18,6 +18,7 @@ const Tasks = () => {
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskForm visibility
     const [isUpdating, setIsUpdating] = useState(null);//we store the task id being updated
     const [isLoading,setIsLoading] = useState(false);
+    const [isAddingWithStatus, setIsAddingWithStatus] = useState(null);
 
     useEffect(() => {
         fetchTasks();
@@ -60,7 +61,9 @@ const Tasks = () => {
     const handleCreate = async (taskData) => {
         // Use the TaskForm's onSubmit to create a task
         try {
-            await createTask(task_list_id, taskData);
+            const response = await createTask(task_list_id, taskData);
+            console.log("Response ; ",response.data);
+
             setIsAdding(false); // Close the form after submission
             await fetchTasks(); // Refresh the tasks list
         } catch(error){
@@ -98,7 +101,7 @@ const Tasks = () => {
         <div>
             <AppNavBar />
             <Container>
-                <h1 className="text-center mt-4">Tasks</h1>
+                <h1 className="text-center mt-4">Tasks of <span style={{color: '#007bff'}}>{taskListTitle}</span> </h1>
                 {isLoading ? (
                     <div
                         style={{
@@ -182,8 +185,72 @@ const Tasks = () => {
                                             </Card>
                                         ))
                                     ) : (
-                                        // Display placeholder if no tasks
-                                        <p className="text-center">No tasks in this category.</p>
+                                        <>
+                                            {isAddingWithStatus===status ? (
+                                                /*
+                                                                                            status is set by default to the one of the column, and the others are set by default also, the user can only choose title
+                                                */
+                                                <Form onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    handleCreate({
+                                                        title: e.target.elements.title.value,
+                                                        description: e.target.elements.description.value,
+                                                        status, // Predefined status for the column
+                                                        priority: 'MEDIUM', // Default priority
+                                                        dueDate: e.target.elements.dueDate.value, // Default due date
+                                                    });
+                                                    setIsAddingWithStatus(null);
+                                                }}>
+                                                    <Form.Group controlId="taskTitle" className="mb-3">
+                                                        <Form.Label>Title</Form.Label>
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Enter task title"
+                                                            name="title"
+                                                            //onChange={(e) => setTitle(e.target.value)}
+                                                            required
+                                                        />
+                                                    </Form.Group>
+                                                    <Form.Group controlId="taskDescription" className="mb-3">
+                                                        <Form.Label>Description</Form.Label>
+                                                        <Form.Control
+                                                            as="textarea"
+                                                            rows={2}
+                                                            placeholder="Enter task description"
+                                                            name="description"
+                                                        />
+                                                    </Form.Group>
+                                                    <Form.Group controlId="taskDueDate" className="mb-3">
+                                                        <Form.Label>Due Date</Form.Label>
+                                                        <Form.Control
+                                                            type="date"
+                                                            name="dueDate"
+                                                            //onChange={(e) => setDueDate(e.target.value)}
+                                                            min={new Date().toISOString().split('T')[0]}
+                                                        />
+                                                    </Form.Group>
+                                                    <div className="d-flex justify-content-between">
+                                                        <Button type="submit" variant="primary">
+                                                            Add a Task
+                                                        </Button>
+                                                        <Button
+                                                            variant="secondary"
+                                                            onClick={() => setIsAddingWithStatus(null)}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </div>
+                                                </Form>
+                                            ) : (
+                                                <Button variant="success" onClick={() => {
+                                                    console.log(`the status is : ${status}`);
+                                                    setIsAddingWithStatus(status)}
+                                                }>
+                                                    Add a Task
+                                                </Button>
+                                            )}
+                                        </>
+
                                     )}
                                 </div>
                             </Col>
