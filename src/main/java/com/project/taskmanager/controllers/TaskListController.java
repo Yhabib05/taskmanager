@@ -74,7 +74,7 @@ public class TaskListController {
     }
 
     /*New Method*/
-    @GetMapping(path="/task-lists/{user_email}/")
+    @GetMapping(path="/task-lists/author/{user_email}")
     public List<TaskListDto> getTaskListByAuthor(@PathVariable("user_email") String userEmail){
         Utilisateur utilisateur = utilisateurService.getUtilisateurByEmail(userEmail);
         return taskListService.getTaskListByAuthor(utilisateur.getId())
@@ -117,10 +117,10 @@ public class TaskListController {
         return ResponseEntity.ok(response);
     }
     /*New Method*/
-    @GetMapping(path="/utilisateurs/member_id/tasklists")
-    public List<TaskListDto> getTaskListByMember(@PathVariable("member_id") UUID memberId){
-        //Utilisateur utilisateur = utilisateurService.getUtilisateurByEmail(userEmail);
-        return taskListService.getTaskListByMember(memberId)
+    @GetMapping(path="/task-lists/member/{member_email}")
+    public List<TaskListDto> getTaskListByMember(@PathVariable("member_email") String member_email){
+        Utilisateur utilisateur = utilisateurService.getUtilisateurByEmail(member_email);
+        return taskListService.getTaskListByMember(utilisateur.getId())
                 .stream()
                 .map(taskListMapper::toDto)
                 .toList();

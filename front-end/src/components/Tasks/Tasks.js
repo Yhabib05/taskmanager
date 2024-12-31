@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams} from 'react-router-dom';
 import {getTasks, getTaskById, createTask, deleteTask, updateTask} from '../../api/taskApi';
 import TaskForm from './TaskForm';
-import AppNavBar from "../UI/Navbar"; // Import the TaskForm component
+import AppNavBar from "../UI/Navbar";
+import backgroundImage from "../../assets/images/background_image.jpeg"
 
-import CloseButton from 'react-bootstrap/CloseButton';
+
+
 import {Spinner, Card, Button, Row, Col, Container, Modal, Form} from "react-bootstrap";
 import {getTaskListById, getTaskListMembers} from "../../api/taskListApi";
 
@@ -48,7 +50,7 @@ const Tasks = () => {
         }
     }
 
-    const fetchTaskListMembers = async (task_list_id) => {
+    const fetchTaskListMembers = async () => {
         setIsLoading(true);
         try{
             const{data}=await getTaskListMembers(task_list_id);
@@ -117,8 +119,17 @@ const Tasks = () => {
     return (
         <div>
             <AppNavBar />
-            <Container fluid>
-                <h1 className="text-center mt-4">Tasks of <span style={{color: '#007bff'}}>{taskListTitle}</span></h1>
+            <Container fluid
+                       style={{
+                           backgroundImage: `url(${backgroundImage})`, // Use the variable with template literals
+                           backgroundSize: 'cover',
+                           backgroundPosition: 'center',
+                           backgroundRepeat: 'no-repeat',
+                           minHeight: '100vh', // Ensures the container takes up the full viewport height
+                           padding: '20px',
+                       }}
+            >
+                <h1 className="text-center mt-4"> <span style={{color: '#007bff'}}>{taskListTitle}</span></h1>
                 {isLoading ? (
                     <div
                         style={{
@@ -126,6 +137,8 @@ const Tasks = () => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             height: '100vh', // Full height of the viewport
+
+
                         }}
                     >
                         <Spinner animation="border" role="status">
@@ -135,7 +148,15 @@ const Tasks = () => {
                 ) : (
                     <Row className="mt-4">
                         <Col md={9}>
-                            <div className="bg-light p-3 rounded shadow position-relative">
+                            <div className=" p-3 rounded shadow position-relative"
+                                 style={{
+                                     backgroundColor: 'rgba(33, 37, 41, 0.85)', // A dark semi-transparent color
+                                     //borderRadius: '15px', // Smooth rounded corners
+                                     //boxShadow: '0 4px 10px rgba(0, 0, 0, 0.3)', // Subtle shadow for depth
+                                     //color: '#f8f9fa', // Light text color for contrast
+                                     //padding: '20px', // Padding for spacing
+                                 }}
+                            >
                                 <Button
                                     variant="warning"
                                     className="position-absolute"
@@ -287,7 +308,11 @@ const Tasks = () => {
                         </Col>
                         {/*Members*/}
                         <Col md={3}>
-                            <div className="bg-light p-3 rounded shadow-sm">
+                            <div className=" p-3 rounded shadow-sm"
+                                 style={{backgroundColor: 'rgba(33, 37, 41, 0.85)',
+                                     color: '#f8f9fa',
+                                 }}
+                            >
                                 {/*<Button
                                     variant="warning"
                                     className="position-absolute"
