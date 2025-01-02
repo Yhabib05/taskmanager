@@ -34,6 +34,10 @@ const Home = () => {
                         style={{
                             maxWidth: "500px",
                             textAlign: "center",
+                            flex: "1",
+                            display: "flex",
+                            flexDirection: "column", // Makes content stack vertically
+                            justifyContent: "space-between",
                         }}
                     >
                         <img
@@ -70,6 +74,10 @@ const Home = () => {
                         style={{
                             maxWidth: "500px",
                             textAlign: "center",
+                            flex:"1",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
                         }}
                     >
                         <img
