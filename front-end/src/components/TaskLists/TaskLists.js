@@ -11,6 +11,7 @@ import {
 } from '../../api/taskListApi';
 import TaskListForm from "./TaskListForm";
 import AppNavBar from "../UI/Navbar"
+import ManageMembersModal from "../UI/ManageMembersModal";
 import CloseButton from "react-bootstrap/CloseButton";
 import ProgressBar from "react-bootstrap/ProgressBar"
 
@@ -159,7 +160,8 @@ const TaskLists = () => {
 
     const handleCloseMembersModal = () => {
         setMembersModal({show:false,taskListId:null});
-        setTaskListMembers([]);
+        //fetchTaskListMembers(tasklistId);
+        //setTaskListMembers([]);
     };
 
 

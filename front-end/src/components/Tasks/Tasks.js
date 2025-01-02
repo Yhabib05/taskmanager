@@ -8,7 +8,7 @@ import backgroundImage from "../../assets/images/background_image.jpeg"
 
 
 import {Spinner, Card, Button, Row, Col, Container, Modal, Form} from "react-bootstrap";
-import {getTaskListById, getTaskListMembers} from "../../api/taskListApi";
+import {addUserToTaskList, deleteUserFromTaskList, getTaskListById, getTaskListMembers} from "../../api/taskListApi";
 
 const Tasks = () => {
     // the useParams extract "task_list_id" from the route :<Route path="/task-lists/:task_list_id/tasks" element={<Tasks />} />
@@ -18,10 +18,15 @@ const Tasks = () => {
     const [tasks, setTasks] = useState([]);
     const [task, setTask] = useState(null);
     const [isAdding, setIsAdding] = useState(false); // State to toggle the TaskForm visibility
+    const [AddMembers, setAddMembers] = useState(false);
     const [isUpdating, setIsUpdating] = useState(null);//we store the task id being updated
     const [isLoading,setIsLoading] = useState(false);
     const [isAddingWithStatus, setIsAddingWithStatus] = useState(null);
     const [taskListMembers,setTaskListMembers] =useState([]);
+
+    const [membersModal, setMembersModal] = useState({ show: false, taskListId: null });
+    const [newMemberEmail,setNewMemberEmail]=useState("");
+    const [addMemberError,setAddMemberError]=useState("");
 
 
     useEffect(() => {
@@ -116,6 +121,44 @@ const Tasks = () => {
         CLOSED: tasks.filter((task) => task.status === 'CLOSED'),
     };
 
+    const handleRemoveMember = async (memberId) => {
+        try {
+            await deleteUserFromTaskList(membersModal.taskListId, memberId);
+            fetchTaskListMembers(membersModal.taskListId);
+        } catch (e) {
+            console.error("Error removing member:", e);
+        }
+    };
+
+    const handleShowMembersModal = (tasklistId) => {
+        setMembersModal({show:true,taskListId:tasklistId});
+        fetchTaskListMembers(tasklistId);
+    };
+
+    const handleCloseMembersModal = () => {
+        setMembersModal({show:false,taskListId:null});
+        //fetchTaskListMembers(tasklistId);
+        //setTaskListMembers([]);
+    };
+
+    const handleAddMember = async () => {
+        try {
+            const {data} = await addUserToTaskList(membersModal.taskListId, {email: newMemberEmail});
+            setNewMemberEmail("");
+            setAddMemberError("");
+            fetchTaskListMembers(membersModal.taskListId);
+        } catch (err) {
+            if (err.response?.status === 404) {
+                // Handle the "user not found" or "tasklist not found" error
+                setAddMemberError(err.response?.data?.message || "User or tasklist not found");
+            } else {
+                // Log other unexpected errors
+                console.error("Error adding member to task list:", err);
+                setAddMemberError("An unexpected error occurred. Please try again.");
+            }
+        }
+    }
+
     return (
         <div>
             <AppNavBar />
@@ -137,8 +180,6 @@ const Tasks = () => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             height: '100vh', // Full height of the viewport
-
-
                         }}
                     >
                         <Spinner animation="border" role="status">
@@ -163,8 +204,7 @@ const Tasks = () => {
                                     style={{
                                         top: '0px', // Adjust this value for vertical positioning
                                         right: '4px', // Adjust this value for horizontal positioning
-                                        fontSize: '2rem', // Adjust the size of the "+"
-                                        //color: 'green', // Set the color for the "+"
+                                        fontSize: '2rem',
                                         padding: '0', // Remove extra padding for precise placement
                                         border: 'none', // Remove any borders
                                         background: 'none', // Ensure background is transparent
@@ -311,9 +351,10 @@ const Tasks = () => {
                             <div className=" p-3 rounded shadow-sm"
                                  style={{backgroundColor: 'rgba(33, 37, 41, 0.85)',
                                      color: '#f8f9fa',
+                                     position: 'relative',
                                  }}
                             >
-                                {/*<Button
+                                <Button
                                     variant="warning"
                                     className="position-absolute"
                                     style={{
@@ -325,9 +366,9 @@ const Tasks = () => {
                                         border: 'none', // Remove any borders
                                         background: 'none', // Ensure background is transparent
                                     }}
-                                    onClick={() => setAddMembers(true)}>
+                                    onClick={() => handleShowMembersModal(task_list_id)}>
                                     +
-                                </Button>*/}
+                                </Button>
                                 <h4 className="text-center mb-4">Members</h4>
                                 {taskListMembers.length > 0 ? (
                                     <ul className="list-group">
@@ -357,6 +398,54 @@ const Tasks = () => {
                     )}
                 </div>
             </Container>
+            {membersModal.show && (
+                <Modal show={membersModal.show} onHide={handleCloseMembersModal} centered size="lg">
+                    <Modal.Header closeButton>
+                        <Modal.Title>Manage Members</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form className="mb-3" onSubmit={(e) => {
+                            e.preventDefault(); // Prevent default form submission behavior
+                            if (!newMemberEmail.trim()) {
+                                setAddMemberError("Email cannot be empty.");
+                                return;
+                            }
+                            handleAddMember(); // Only call handleAddMember when input is valid
+                        }}>
+                            <Form.Group controlId="newMemberEmail" className="mb-4">
+                                <Form.Label>Add Member</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    placeholder="Enter member's email"
+                                    value={newMemberEmail}
+                                    onChange={(e) =>{
+                                        setNewMemberEmail(e.target.value);
+                                        setAddMemberError("");
+                                    }}
+                                    required
+                                />
+                                {addMemberError && <small className="text-danger">{addMemberError}</small>}
+                            </Form.Group>
+                            <Button
+                                variant="primary"
+                                //onClick={handleAddMember}
+                                type="submit"
+                            >
+                                Add Member
+                            </Button>
+                        </Form>
+                        <h5>Current Members</h5>
+                        <ul className="list-group">
+                            {taskListMembers.map((member) => (
+                                <li key={member.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                    {member.email}
+                                    <Button variant="danger" size="sm" onClick={() => handleRemoveMember(member.id)}>Remove</Button>
+                                </li>
+                            ))}
+                        </ul>
+                    </Modal.Body>
+                </Modal>
+            )}
             {task && (
                 <Modal show={!!task} onHide={() => setTask(null)} centered>
                     <Modal.Header closeButton>
