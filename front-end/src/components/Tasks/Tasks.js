@@ -219,7 +219,7 @@ const Tasks = () => {
                                             <Col key={status} md={4} className="mb-4">
                                                 <div className="p-3 bg-dark text-white rounded-4 shadow">
                                                     <h3 className="text-center text-success">{status}</h3>
-                                                    {tasksByStatus[status].length > 0 ? (
+                                                    {tasksByStatus[status].length > 0 &&
                                                         tasksByStatus[status].map((task) => (
                                                             <Card
                                                                 key={task.id}
@@ -268,13 +268,9 @@ const Tasks = () => {
                                                                     )}
                                                                 </Card.Body>
                                                             </Card>
-                                                        ))
-                                                    ) : (
-                                                        <>
-                                                            {isAddingWithStatus === status ? (
-                                                                /*
-                                                                                                            status is set by default to the one of the column, and the others are set by default also, the user can only choose title
-                                                                */
+
+                                                        ))}
+                                                    {isAddingWithStatus === status ? (
                                                                 <Form onSubmit={(e) => {
                                                                     e.preventDefault();
                                                                     handleCreate({
@@ -336,13 +332,11 @@ const Tasks = () => {
                                                                 }>
                                                                     Add a Task
                                                                 </Button>
-                                                            )}
-                                                        </>
-
                                                     )}
                                                 </div>
                                             </Col>
                                         ))}
+
                                 </Row>
                             </div>
                         </Col>
@@ -386,16 +380,80 @@ const Tasks = () => {
                     </Row>
                 )}
                 <div style={{marginTop: '20px'}}>
-                    {isAdding ? (
-                        <TaskForm
-                            onSubmit={handleCreate}
-                            onCancel={() => setIsAdding(false)} // Close form on cancel
-                        />
-                    ) : (
-                        <Button variant="success" onClick={() => setIsAdding(true)}>
-                            Add Task
+                    {isAdding && (
+                        // <TaskForm
+                        //     onSubmit={handleCreate}
+                        //     onCancel={() => setIsAdding(false)} // Close form on cancel
+                        // />
+                        <Modal show={isAdding} onHide={() => setIsAdding(false)} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>New Task</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleCreate({
+                                title: e.target.elements.title.value,
+                                description: e.target.elements.description.value,
+                                status:e.target.elements.status.value,
+                                priority: 'MEDIUM',
+                                dueDate: e.target.elements.dueDate.value,
+                            });
+                            setIsAdding(false);
+                        }}>
+                            <Form.Group controlId="taskTitle" className="mb-3">
+                                <Form.Label>Title</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter task title"
+                                    name="title"
+                                    required
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="taskDescription"
+                                        className="mb-3">
+                                <Form.Label>Description</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={2}
+                                    placeholder="Enter task description"
+                                    name="description"
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="taskStatus"
+                                        className="mb-3">
+                                <Form.Label>Status</Form.Label>
+                                <Form.Select name="status" defaultValue="OPEN">
+                                    <option value="OPEN">Open</option>
+                                    <option value="INPROCESS">In Process</option>
+                                    <option value="CLOSED">Closed</option>
+                                </Form.Select>
+                            </Form.Group>
+                            <Form.Group controlId="taskDueDate"
+                                        className="mb-3">
+                            <Form.Label>Due Date</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    name="dueDate"
+                                    min={new Date().toISOString().split('T')[0]}
+                                />
+                            </Form.Group>
+                            <div className="d-flex justify-content-between">
+                                <Button type="submit" variant="primary">
+                                    Add a Task
+                                </Button>
+                            </div>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setIsAdding(false)}>
+                            Close
                         </Button>
-                    )}
+                    </Modal.Footer>
+                </Modal>
+                )}
+
+
                 </div>
             </Container>
             {membersModal.show && (
